@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAMS – Research Activity Monitoring System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&display=swap');
+
+  :root {
+    --navy: #0C1F3F;
+    --blue: #1A5276;
+    --teal: #148F77;
+    --gold: #D4A017;
+    --coral: #C0392B;
+    --slate: #2C3E50;
+    --light: #F8F9FA;
+    --muted: #7F8C8D;
+    --card: #FFFFFF;
+    --border: #E8ECF0;
+    --shadow: 0 2px 12px rgba(12,31,63,0.08);
+    --shadow-lg: 0 8px 32px rgba(12,31,63,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--light);
+    color: var(--slate);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #0F2B52 40%, var(--blue) 100%);
+    color: white;
+    padding: 72px 40px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,160,23,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20,143,119,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .hero-logo-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--gold) 0%, #E8B92D 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--navy);
+    box-shadow: 0 4px 16px rgba(212,160,23,0.3);
+  }
+
+  .hero-logo-text {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(36px, 5vw, 52px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(90deg, var(--gold), #F0C940);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-size: 17px;
+    line-height: 1.7;
+    opacity: 0.7;
+    max-width: 640px;
+    font-weight: 400;
+  }
+
+  .hero-meta {
+    margin-top: 28px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    opacity: 0.5;
+  }
+
+  .hero-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ===== SECTION PAGES ===== */
+  .section-header {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 40px 12px;
+  }
+
+  .section-header h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .section-header p {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 6px;
+  }
+
+  .pages-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 40px 64px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .page-card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 32px 28px 28px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--blue), var(--teal));
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .page-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+    border-color: transparent;
+  }
+
+  .page-card:hover::before {
+    opacity: 1;
+  }
+
+  .page-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 18px;
+    flex-shrink: 0;
+  }
+
+  .page-card h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .page-card p {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--muted);
+    flex-grow: 1;
+  }
+
+  .page-card-status {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-live { background: #E8F6F3; color: var(--teal); }
+  .status-soon { background: #FEF5E7; color: #B7950B; }
+  .status-planned { background: #F2F4F4; color: var(--muted); }
+
+  .page-card-arrow {
+    position: absolute;
+    top: 28px;
+    right: 24px;
+    font-size: 18px;
+    color: var(--border);
+    transition: all 0.25s ease;
+  }
+
+  .page-card:hover .page-card-arrow {
+    color: var(--gold);
+    transform: translateX(4px);
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    border-top: 1px solid var(--border);
+    background: #FAFBFC;
+  }
+
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .footer-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--navy), var(--blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .footer-brand-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--navy);
+    letter-spacing: 0.3px;
+  }
+
+  .footer-brand-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .footer-right {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .footer-right a {
+    color: var(--blue);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 48px 24px 40px; }
+    .section-header { padding-left: 24px; padding-right: 24px; }
+    .pages-grid { padding-left: 24px; padding-right: 24px; grid-template-columns: 1fr; }
+    .footer-inner { padding: 20px 24px; flex-direction: column; text-align: center; }
+    .footer-right { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-logo">
+      <div class="hero-logo-icon">R+</div>
+      <div class="hero-logo-text">RAMS</div>
+    </div>
+    <h1>Research Activity<br><span>Monitoring System</span></h1>
+    <p class="hero-subtitle">
+      Technical documentation and methodology for NSW Health's research attribution, entity resolution, and publication tracking platform.
+    </p>
+    <div class="hero-meta">
+      <span>Office for Health &amp; Medical Research</span>
+      <span>·</span>
+      <span>NSW Health</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGES ===== -->
+<div class="section-header">
+  <h2>Documentation</h2>
+  <p>Explore RAMS technical documentation, methodology guides, and framework specifications.</p>
+</div>
+
+<div class="pages-grid">
+
+  <!-- Entity Resolution -->
+  <a href="Entity-Resolution/" class="page-card">
+    <span class="page-card-arrow">→</span>
+    <div class="page-card-icon" style="background:#EBF5FB;color:var(--blue);">🔗</div>
+    <h3>Entity Resolution &amp; Attribution</h3>
+    <p>Multi-affiliation attribution framework covering fractional counting models, researcher identity resolution, StaffLink integration, and sensitivity analysis.</p>
+    <span class="page-card-status status-live">Live</span>
+  </a>
+
+  <!-- Placeholder: add more pages as you create them -->
+  <!--
+  <a href="Data-Pipeline/" class="page-card">
+    <span class="page-card-arrow">→</span>
+    <div class="page-card-icon" style="background:#E8F6F3;color:var(--teal);">⚙️</div>
+    <h3>Data Pipeline Architecture</h3>
+    <p>End-to-end data ingestion from PubMed, Crossref, ORCID, and institutional sources into the RAMS attribution engine.</p>
+    <span class="page-card-status status-soon">Coming Soon</span>
+  </a>
+
+  <a href="Metrics-Dashboard/" class="page-card">
+    <span class="page-card-arrow">→</span>
+    <div class="page-card-icon" style="background:#FEF5E7;color:#B7950B;">📊</div>
+    <h3>Metrics &amp; Dashboards</h3>
+    <p>Publication metrics, h-index tracking, and Power BI dashboard specifications for LHD and MRI research output reporting.</p>
+    <span class="page-card-status status-planned">Planned</span>
+  </a>
+  -->
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">R+</div>
+      <div>
+        <div class="footer-brand-name">RAMS</div>
+        <div class="footer-brand-sub">Research Activity Monitoring System</div>
+      </div>
+    </div>
+    <div class="footer-right">
+      <a href="https://www.linkedin.com/in/yagizalpaksoy/" target="_blank" rel="noopener">Dr Yagiz Aksoy MD PhD</a>
+      <span style="margin:0 6px;color:#D5D8DC">·</span>
+      Office for Health and Medical Research, NSW Health
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
