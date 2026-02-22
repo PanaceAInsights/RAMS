@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAMS Multi-Affiliation Attribution Framework</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&display=swap');
+
+  :root {
+    --navy: #0C1F3F;
+    --blue: #1A5276;
+    --teal: #148F77;
+    --gold: #D4A017;
+    --coral: #C0392B;
+    --slate: #2C3E50;
+    --light: #F8F9FA;
+    --muted: #7F8C8D;
+    --card: #FFFFFF;
+    --border: #E8ECF0;
+    --shadow: 0 2px 12px rgba(12,31,63,0.08);
+    --shadow-lg: 0 8px 32px rgba(12,31,63,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--light);
+    color: var(--slate);
+    line-height: 1.6;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    color: white;
+    padding: 48px 40px 40px;
+  }
+
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .header .subtitle {
+    font-size: 15px;
+    opacity: 0.75;
+    font-weight: 400;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* Tab Navigation */
+  .tabs {
+    display: flex;
+    gap: 0;
+    background: white;
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 40px;
+  }
+
+  .tab {
+    padding: 16px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab:hover { color: var(--blue); }
+
+  .tab.active {
+    color: var(--blue);
+    border-bottom-color: var(--gold);
+  }
+
+  .tab-content { display: none; padding: 32px 0 48px; }
+  .tab-content.active { display: block; }
+
+  /* Section Titles */
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 28px;
+    max-width: 700px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+
+  .card-title {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--navy);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-current { background: #E8F6F3; color: var(--teal); }
+  .badge-recommended { background: #FEF5E7; color: #B7950B; }
+  .badge-alternative { background: #F2F4F4; color: var(--muted); }
+  .badge-stafflink { background: #EBF5FB; color: var(--blue); }
+
+  /* ====== THE MATRIX FLOW ====== */
+  .flow-container {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    padding: 36px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+  }
+
+  .flow-title {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  /* Researcher Profile Box */
+  .researcher-card {
+    background: linear-gradient(135deg, #EBF5FB 0%, #D6EAF8 100%);
+    border: 2px solid var(--blue);
+    border-radius: 12px;
+    padding: 20px 24px;
+    max-width: 500px;
+    margin: 0 auto 32px;
+  }
+
+  .researcher-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+
+  .researcher-field {
+    font-size: 13px;
+    color: var(--blue);
+    margin-bottom: 12px;
+  }
+
+  .affiliation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .affiliation-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+
+  .aff-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .aff-label {
+    font-weight: 600;
+    min-width: 100px;
+  }
+
+  /* Flow Arrow */
+  .flow-arrow {
+    text-align: center;
+    padding: 12px 0;
+    color: var(--muted);
+    font-size: 24px;
+  }
+
+  /* Matrix Table */
+  .matrix-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+
+  .matrix-table thead th {
+    background: var(--navy);
+    color: white;
+    padding: 12px 16px;
+    font-weight: 600;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+
+  .matrix-table thead th:first-child {
+    border-radius: 8px 0 0 0;
+    text-align: left;
+  }
+
+  .matrix-table thead th:last-child {
+    border-radius: 0 8px 0 0;
+  }
+
+  .matrix-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .matrix-table tbody td:first-child {
+    text-align: left;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .matrix-table tbody tr:hover {
+    background: #F8FBFE;
+  }
+
+  .matrix-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .matrix-table tbody tr:last-child td:first-child {
+    border-radius: 0 0 0 8px;
+  }
+
+  .matrix-table tbody tr:last-child td:last-child {
+    border-radius: 0 0 8px 0;
+  }
+
+  /* Cell highlights */
+  .cell-full { background: #E8F8F5; color: var(--teal); font-weight: 700; }
+  .cell-frac { background: #FEF9E7; color: #B7950B; font-weight: 700; }
+  .cell-zero { background: #FDEDEC; color: #C0392B; font-weight: 600; }
+  .cell-stafflink { background: #EBF5FB; color: var(--blue); font-weight: 700; }
+  .cell-na { color: #BDC3C7; font-style: italic; }
+
+  /* Attribution Models Grid */
+  .models-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 800px) {
+    .models-grid { grid-template-columns: 1fr; }
+    .container { padding: 0 20px; }
+    .header { padding: 32px 20px; }
+    .tabs { padding: 0 20px; overflow-x: auto; }
+  }
+
+  .model-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    position: relative;
+    transition: box-shadow 0.2s;
+  }
+
+  .model-card:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .model-card.recommended {
+    border: 2px solid var(--gold);
+  }
+
+  .model-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+
+  .model-aka {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .model-desc {
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    color: #555;
+  }
+
+  .model-example {
+    background: #F8F9FA;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 12px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--blue);
+  }
+
+  .model-example strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--navy);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .pro-con {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    font-size: 12px;
+  }
+
+  .pro-con div {
+    padding: 10px 12px;
+    border-radius: 6px;
+  }
+
+  .pros {
+    background: #E8F8F5;
+    color: #1A8F6E;
+  }
+
+  .cons {
+    background: #FDEDEC;
+    color: #B03A2E;
+  }
+
+  .pro-con strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Visual Diagram */
+  .diagram-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  .diagram-box {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .diagram-arrow {
+    font-size: 20px;
+    color: var(--muted);
+  }
+
+  .source-box { background: #D5F5E3; color: #1E8449; border: 1px solid #A9DFBF; }
+  .process-box { background: #D6EAF8; color: var(--blue); border: 1px solid #AED6F1; }
+  .output-box { background: #FDEBD0; color: #B7950B; border: 1px solid #F9E79F; }
+  .stafflink-box { background: #E8DAEF; color: #6C3483; border: 1px solid #D2B4DE; }
+
+  /* Sensitivity section */
+  .confidence-bar {
+    display: flex;
+    height: 36px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  .conf-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .conf-high { background: var(--teal); }
+  .conf-med { background: var(--gold); }
+  .conf-low { background: var(--coral); }
+
+  .conf-legend {
+    display: flex;
+    gap: 24px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .conf-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .conf-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* Use Case Table */
+  .usecase-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .usecase-table thead th {
+    background: var(--slate);
+    color: white;
+    padding: 12px 16px;
+    font-weight: 600;
+    text-align: left;
+    font-size: 12px;
+  }
+
+  .usecase-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .usecase-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .usecase-table tbody tr:nth-child(even) {
+    background: #FAFBFC;
+  }
+
+  /* StaffLink Enhancement visual */
+  .stafflink-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
+    margin: 24px 0;
+  }
+
+  .sl-step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 700px;
+    box-shadow: var(--shadow);
+  }
+
+  .sl-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .sl-connector {
+    width: 2px;
+    height: 16px;
+    background: var(--border);
+  }
+
+  .sl-text {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .sl-text strong {
+    color: var(--navy);
+  }
+
+  .highlight-text {
+    background: linear-gradient(120deg, #FEF9E7 0%, #FEF5E7 100%);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    color: #B7950B;
+  }
+
+  /* Recommendation Box */
+  .recommendation {
+    background: linear-gradient(135deg, #0C1F3F 0%, #1A5276 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 28px;
+    margin-top: 32px;
+  }
+
+  .recommendation h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: #F9E79F;
+  }
+
+  .recommendation p {
+    font-size: 14px;
+    line-height: 1.7;
+    opacity: 0.9;
+  }
+
+  .note-box {
+    background: #FEF9E7;
+    border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    font-size: 13px;
+    margin: 20px 0;
+    color: #7D6608;
+  }
+
+  .note-box strong {
+    color: #B7950B;
+  }
+
+  .full-width-card {
+    grid-column: 1 / -1;
+  }
+
+  /* Author Position Layer */
+  .author-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  @media (max-width: 800px) {
+    .author-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .author-pos-card {
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+
+  .author-pos-card .pos-icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+
+  .author-pos-card .pos-label {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--navy);
+    margin-bottom: 2px;
+  }
+
+  .author-pos-card .pos-desc {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .author-pos-card .pos-weight {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Fraunces', serif;
+  }
+
+  .author-pos-card .pos-weight-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .scenario-toggle {
+    display: flex;
+    gap: 0;
+    margin: 24px 0 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--blue);
+    max-width: 500px;
+  }
+
+  .scenario-btn {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    background: white;
+    color: var(--blue);
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .scenario-btn.active {
+    background: var(--blue);
+    color: white;
+  }
+
+  .scenario-btn:hover:not(.active) {
+    background: #EBF5FB;
+  }
+
+  .scenario-panel { display: none; }
+  .scenario-panel.active { display: block; }
+
+  .formula-box {
+    background: var(--navy);
+    color: white;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    text-align: center;
+    font-family: 'DM Sans', monospace;
+  }
+
+  .formula-box .formula {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .formula-box .formula-desc {
+    font-size: 12px;
+    opacity: 0.7;
+  }
+
+  .formula-box .formula span {
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin: 0 2px;
+  }
+
+  .formula-op { color: #F9E79F; }
+  .formula-author { background: rgba(142,68,173,0.3); }
+  .formula-org { background: rgba(26,82,118,0.3); }
+  .formula-result { background: rgba(20,143,119,0.3); }
+</style>
+</head>
+<body>
+
+<!-- Back navigation -->
+<nav style="background:#0A1929;padding:10px 40px;font-size:13px;">
+  <a href="../" style="color:rgba(255,255,255,0.7);text-decoration:none;font-family:'DM Sans',sans-serif;font-weight:500;display:inline-flex;align-items:center;gap:6px;transition:color 0.2s;" onmouseover="this.style.color='#D4A017'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
+    ← Back to RAMS Hub
+  </a>
+</nav>
+
+<div class="header">
+  <div class="container">
+    <h1>RAMS Multi-Affiliation Attribution Framework</h1>
+    <div class="subtitle">How RAMS resolves, attributes, and reports publications for researchers with multiple institutional affiliations</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab(0)">Attribution Matrix</div>
+  <div class="tab" onclick="showTab(1)">Case Study</div>
+  <div class="tab" onclick="showTab(2)">Attribution Models</div>
+  <div class="tab" onclick="showTab(3)">StaffLink Enhancement</div>
+  <div class="tab" onclick="showTab(4)">Sensitivity & Confidence</div>
+</div>
+
+
+<!-- ==================== TAB 1: ATTRIBUTION MATRIX ==================== -->
+<div class="tab-content active">
+  <div class="container">
+    <div class="section-title">How RAMS Attributes Publications</div>
+    <div class="section-desc">RAMS counts papers, not people. The foundational principle is simple: if an organisation has <em>any</em> author affiliated with a paper, that organisation gets +1. Different counting models can then be layered on top - but the base attribution must be right first.</div>
+
+    <!-- ===== CURRENT MODEL ===== -->
+    <div class="flow-container" style="border:2px solid var(--teal)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <span style="background:var(--teal);color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">CURRENT MODEL</span>
+        <span class="flow-title" style="margin:0;text-align:left">Paper-Level Full Count - What RAMS Does Now</span>
+      </div>
+
+      <div style="background:#E8F8F5;border-radius:10px;padding:20px 24px;margin-bottom:24px">
+        <p style="font-size:15px;line-height:1.8;color:var(--navy);font-weight:500;margin:0">
+          It is the <strong>paper</strong> that counts, not the person. One paper with 100 authors still counts as <strong>one paper</strong> - regardless of whether 100 of those authors are affiliated with a precinct organisation or only 1 out of 100 is. If <em>any</em> author lists an affiliation, that organisation gets <strong>+1</strong>. At the precinct level, the same logic applies: if <em>any</em> organisation within a precinct is represented, that precinct gets <strong>+1</strong>.
+        </p>
+      </div>
+
+      <!-- Example Paper -->
+      <div class="researcher-card" style="max-width:100%;background:linear-gradient(135deg,#F8F9FA 0%,#EBF0F5 100%);border-color:var(--slate)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
+          <div>
+            <div class="researcher-name" style="font-size:16px">Example: One Paper in <em>The Lancet</em></div>
+            <div class="researcher-field" style="color:var(--slate)">100 authors · Cardiovascular Surgery · Published 2025</div>
+          </div>
+          <div style="background:var(--navy);color:white;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;white-space:nowrap">
+            This paper counts as <span style="color:#F9E79F;font-size:18px;margin-left:4px">1</span>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px dashed #B0BEC5">
+          <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:10px">Authors on this paper affiliated with precinct organisations:</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+              <div class="aff-dot" style="background:#2E86C1"></div>
+              <span><strong>5 authors</strong> list University of Sydney</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+              <div class="aff-dot" style="background:#E67E22"></div>
+              <span><strong>10 authors</strong> list Royal North Shore Hospital</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+              <div class="aff-dot" style="background:#8E44AD"></div>
+              <span><strong>15 authors</strong> list Kolling Institute</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+              <div class="aff-dot" style="background:#27AE60"></div>
+              <span><strong>3 authors</strong> employed by NSLHD <span style="color:var(--coral);font-size:11px;font-weight:600">(not listed - StaffLink ✦)</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-arrow">▼</div>
+
+      <!-- CURRENT MODEL: ORG LEVEL -->
+      <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px">
+        <span style="background:var(--blue);color:white;padding:2px 10px;border-radius:4px;font-size:11px;letter-spacing:0.5px">ORGANISATION</span>
+        Each org with any affiliated author gets +1
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">It doesn't matter that USyd has 5 authors and Kolling has 15. Each organisation is present on the paper, so each gets <strong>+1</strong>.</p>
+
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th style="width:22%"></th>
+            <th style="background:#2E86C1">University of<br>Sydney<br><small style="font-weight:400;opacity:0.8">5 authors</small></th>
+            <th style="background:#E67E22">Royal North<br>Shore Hospital<br><small style="font-weight:400;opacity:0.8">10 authors</small></th>
+            <th style="background:#8E44AD">Kolling<br>Institute<br><small style="font-weight:400;opacity:0.8">15 authors</small></th>
+            <th style="background:#27AE60">Northern<br>Sydney LHD ✦<br><small style="font-weight:400;opacity:0.8">3 authors</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Publication Count</strong><br><small style="color:var(--muted);font-weight:400">from this one paper</small></td>
+            <td class="cell-full" style="font-size:20px">+1</td>
+            <td class="cell-full" style="font-size:20px">+1</td>
+            <td class="cell-full" style="font-size:20px">+1</td>
+            <td class="cell-stafflink" style="font-size:20px">+1 ✦</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="flow-arrow">▼ <span style="font-size:12px;color:var(--muted);vertical-align:middle">rolls up to</span> ▼</div>
+
+      <!-- CURRENT MODEL: PRECINCT LEVEL -->
+      <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px">
+        <span style="background:var(--teal);color:white;padding:2px 10px;border-radius:4px;font-size:11px;letter-spacing:0.5px">PRECINCT</span>
+        Each precinct with any affiliated organisation gets +1
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">RNSH, Kolling, and NSLHD all sit within Sydney North - but the precinct still only gets <strong>+1</strong> from this paper. Same for SIPFHER via USyd.</p>
+
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th style="width:22%"></th>
+            <th style="background:#148F77">Sydney North<br><small style="font-weight:400;opacity:0.8">RNSH + Kolling + NSLHD</small></th>
+            <th style="background:#148F77">SIPFHER<br><small style="font-weight:400;opacity:0.8">University of Sydney</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Publication Count</strong><br><small style="color:var(--muted);font-weight:400">from this one paper</small></td>
+            <td class="cell-full" style="font-size:20px">+1</td>
+            <td class="cell-full" style="font-size:20px">+1</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note-box" style="margin-top:20px">
+        <strong>✦ StaffLink Recovery:</strong> Northern Sydney LHD was NOT listed on the publication by any author. RAMS recovers this attribution by matching 3 of the paper's authors via their StaffLink IDs (from REGIS or Entra ID) to their NSLHD cost centres. This confirms the LHD's involvement - and by extension strengthens the Sydney North precinct attribution - even when no author acknowledged the LHD.
+      </div>
+
+      <div class="note-box" style="border-left-color:var(--teal);">
+        <strong style="color:var(--teal)">The key insight:</strong> Under the current model, the number of authors per organisation is irrelevant for counting. What matters is whether the attribution to each organisation is <strong>correct</strong>. This is where RAMS entity resolution and StaffLink recovery add the most value - ensuring no organisation is missed, even if the authors didn't list it.
+      </div>
+    </div>
+
+    <!-- ===== WHAT MATTERS MOST ===== -->
+    <div class="card" style="border:2px solid var(--navy)">
+      <div class="card-title" style="font-size:18px">The Foundation: Get the Base Attribution Right</div>
+      <p style="font-size:14px;line-height:1.8">
+        Before any counting model is applied, RAMS must correctly answer two questions for every paper: <strong>which organisations are genuinely connected to this paper?</strong> and <strong>which precincts do those organisations belong to?</strong>
+      </p>
+      <p style="font-size:14px;line-height:1.8;margin-top:12px">
+        This is the entity resolution challenge - normalising affiliation strings ("Dept. of Cardiothoracic Surg., RNSH" → Royal North Shore Hospital), resolving researcher identities across name variants, and recovering hidden affiliations via StaffLink. If the base attribution is accurate, <em>any</em> counting model can be applied on top. If the base is wrong, no model will produce trustworthy results.
+      </p>
+      <p style="font-size:14px;line-height:1.8;margin-top:12px">
+        <strong>There does not need to be one ultimate counting model.</strong> As long as the base attributions are as correct as possible, the choice of how to count - full count, fractional, weighted - can be decided separately for each reporting scenario. The same underlying data supports all of them.
+      </p>
+    </div>
+
+    <!-- ===== ALTERNATIVE OPTIONS ===== -->
+    <div class="flow-container" style="border-color:var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <span style="background:var(--gold);color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">OPTIONS</span>
+        <span class="flow-title" style="margin:0;text-align:left">Alternative Counting Models - Applied Per Scenario</span>
+      </div>
+
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px">These models sit on top of the same base attribution data. The choice of model depends on the question being asked - and different reports can use different models simultaneously.</p>
+
+      <!-- Same example paper, different models -->
+      <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px">
+        <span style="background:var(--blue);color:white;padding:2px 10px;border-radius:4px;font-size:11px;letter-spacing:0.5px">ORGANISATION LEVEL</span>
+        Same paper, different counting models
+      </div>
+
+      <table class="matrix-table" style="margin-bottom:28px">
+        <thead>
+          <tr>
+            <th style="width:18%">Counting Model</th>
+            <th style="background:#2E86C1">University of<br>Sydney</th>
+            <th style="background:#E67E22">Royal North<br>Shore Hospital</th>
+            <th style="background:#8E44AD">Kolling<br>Institute</th>
+            <th style="background:#27AE60">Northern<br>Sydney LHD ✦</th>
+            <th style="background:#34495E">Org Total</th>
+            <th style="background:#34495E;width:22%">When to Use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#E8F8F5">
+            <td>Full Count<br><small style="color:var(--teal);font-weight:600">CURRENT</small></td>
+            <td class="cell-full" style="font-size:16px">+1</td>
+            <td class="cell-full" style="font-size:16px">+1</td>
+            <td class="cell-full" style="font-size:16px">+1</td>
+            <td class="cell-stafflink" style="font-size:16px">+1 ✦</td>
+            <td style="font-weight:700">4.0</td>
+            <td style="text-align:left;font-weight:400;font-size:12px">Precinct mapping, research strength profiling, standard bibliometrics</td>
+          </tr>
+          <tr>
+            <td>Fractional<br><small style="color:var(--muted);font-weight:400">(Pro Rata)</small></td>
+            <td class="cell-frac">0.25</td>
+            <td class="cell-frac">0.25</td>
+            <td class="cell-frac">0.25</td>
+            <td class="cell-stafflink">0.25 ✦</td>
+            <td style="font-weight:700">1.0</td>
+            <td style="text-align:left;font-weight:400;font-size:12px">Grant evaluation, funding ROI, avoiding double-count</td>
+          </tr>
+          <tr>
+            <td>First-Listed<br><small style="color:var(--muted);font-weight:400">(Primary Only)</small></td>
+            <td class="cell-full">1.0</td>
+            <td class="cell-zero">0.0</td>
+            <td class="cell-zero">0.0</td>
+            <td class="cell-zero">0.0</td>
+            <td style="font-weight:700">1.0</td>
+            <td style="text-align:left;font-weight:400;font-size:12px">International ranking comparisons</td>
+          </tr>
+          <tr>
+            <td>Weighted<br><small style="color:var(--muted);font-weight:400">(Configurable)</small></td>
+            <td class="cell-frac">0.40</td>
+            <td class="cell-frac">0.25</td>
+            <td class="cell-frac">0.20</td>
+            <td class="cell-frac">0.15</td>
+            <td style="font-weight:700">1.0</td>
+            <td style="text-align:left;font-weight:400;font-size:12px">Policy development, nuanced analysis</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Precinct rollup for alternatives -->
+      <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px">
+        <span style="background:var(--teal);color:white;padding:2px 10px;border-radius:4px;font-size:11px;letter-spacing:0.5px">PRECINCT LEVEL</span>
+        Same paper, precinct rollup under each model
+      </div>
+
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th style="width:18%">Counting Model</th>
+            <th style="background:#148F77">Sydney North<br><small style="font-weight:400;opacity:0.8">RNSH + Kolling + NSLHD</small></th>
+            <th style="background:#148F77">SIPFHER<br><small style="font-weight:400;opacity:0.8">University of Sydney</small></th>
+            <th style="background:#34495E">Precinct Total</th>
+            <th style="background:#34495E;width:26%">Key Observation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:#E8F8F5">
+            <td>Full Count<br><small style="color:var(--teal);font-weight:600">CURRENT</small></td>
+            <td class="cell-full" style="font-size:16px">+1</td>
+            <td class="cell-full" style="font-size:16px">+1</td>
+            <td style="font-weight:700">2.0</td>
+            <td style="text-align:left;font-weight:400;font-size:12px;color:#555">Each precinct counts once regardless of how many orgs within it</td>
+          </tr>
+          <tr>
+            <td>Fractional<br><small style="color:var(--muted);font-weight:400">(by precinct)</small></td>
+            <td class="cell-frac">0.50</td>
+            <td class="cell-frac">0.50</td>
+            <td style="font-weight:700">1.0</td>
+            <td style="text-align:left;font-weight:400;font-size:12px;color:#555">Split equally between the 2 precincts</td>
+          </tr>
+          <tr>
+            <td>Fractional<br><small style="color:var(--muted);font-weight:400">(by org, then sum)</small></td>
+            <td class="cell-frac">0.75</td>
+            <td class="cell-frac">0.25</td>
+            <td style="font-weight:700">1.0</td>
+            <td style="text-align:left;font-weight:400;font-size:12px;color:#555">Sydney North gets 3/4 because 3 of 4 orgs sit within it</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== OPTIONAL: AUTHOR POSITION ===== -->
+    <div class="flow-container" style="border-color:var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <span style="background:#8E44AD;color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">OPTIONAL LAYER</span>
+        <span class="flow-title" style="margin:0;text-align:left">Author Position Weighting</span>
+      </div>
+
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">The current model doesn't consider author position because it counts papers, not contributions. However, for specific analyses (e.g., grant ROI, research leadership), author position weighting can be layered on to show <em>how</em> an organisation contributes, not just <em>whether</em> it contributes.</p>
+
+      <div class="formula-box">
+        <div class="formula">
+          <span class="formula-result">Weighted Credit</span> <span class="formula-op">=</span> <span class="formula-author">Author Position Weight</span> <span class="formula-op">×</span> <span class="formula-org">Org Attribution Share</span>
+        </div>
+        <div class="formula-desc">Optional - only applied when the analytical question requires it</div>
+      </div>
+
+      <div class="author-grid">
+        <div class="author-pos-card" style="background:#F5EEF8;border-color:#D2B4DE">
+          <div class="pos-icon">🥇</div>
+          <div class="pos-label">First Author</div>
+          <div class="pos-desc">Conducted the research,<br>wrote the manuscript</div>
+          <div class="pos-weight" style="color:#6C3483">40%</div>
+          <div class="pos-weight-label">Typical weight</div>
+        </div>
+        <div class="author-pos-card" style="background:#EBF5FB;border-color:#AED6F1">
+          <div class="pos-icon">🥈</div>
+          <div class="pos-label">Senior / Last Author</div>
+          <div class="pos-desc">Supervised, conceived,<br>secured funding</div>
+          <div class="pos-weight" style="color:var(--blue)">30%</div>
+          <div class="pos-weight-label">Typical weight</div>
+        </div>
+        <div class="author-pos-card" style="background:#FEF9E7;border-color:#F9E79F">
+          <div class="pos-icon">✉️</div>
+          <div class="pos-label">Corresponding Author</div>
+          <div class="pos-desc">Handled submission,<br>often = senior author</div>
+          <div class="pos-weight" style="color:#B7950B">+5%</div>
+          <div class="pos-weight-label">Bonus modifier</div>
+        </div>
+        <div class="author-pos-card" style="background:#F8F9FA;border-color:#E8ECF0">
+          <div class="pos-icon">👥</div>
+          <div class="pos-label">Middle Authors</div>
+          <div class="pos-desc">Data, analysis, review,<br>specialist contributions</div>
+          <div class="pos-weight" style="color:var(--muted)">30% ÷ n</div>
+          <div class="pos-weight-label">Split among middle</div>
+        </div>
+      </div>
+
+      <!-- Compact comparison -->
+      <div style="font-size:13px;font-weight:600;color:var(--navy);margin-top:24px;margin-bottom:4px">Example: Prof. Smith on a 10-author paper (using Fractional + StaffLink base)</div>
+
+      <div class="scenario-toggle">
+        <button class="scenario-btn active" onclick="showScenario(0)">Smith is 1st Author</button>
+        <button class="scenario-btn" onclick="showScenario(1)">Smith is Middle Author</button>
+        <button class="scenario-btn" onclick="showScenario(2)">Smith is Last Author</button>
+      </div>
+
+      <div class="scenario-panel active" id="scenario-0">
+        <div style="background:#F5EEF8;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:#6C3483">
+          <strong>Prof. Smith = 1st Author</strong> &nbsp;→&nbsp; Position weight: <strong>40%</strong> &nbsp;→&nbsp; Smith's total credit: <strong>0.400</strong> &nbsp;→&nbsp; Sydney North: <strong>0.300</strong> · SIPFHER: <strong>0.100</strong>
+        </div>
+      </div>
+      <div class="scenario-panel" id="scenario-1">
+        <div style="background:#F8F9FA;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:var(--slate)">
+          <strong>Prof. Smith = 5th Author (middle)</strong> &nbsp;→&nbsp; Position weight: <strong>3.75%</strong> &nbsp;→&nbsp; Smith's total credit: <strong>0.038</strong> &nbsp;→&nbsp; Sydney North: <strong>0.028</strong> · SIPFHER: <strong>0.009</strong>
+        </div>
+      </div>
+      <div class="scenario-panel" id="scenario-2">
+        <div style="background:#EBF5FB;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:var(--blue)">
+          <strong>Prof. Smith = Last + Corresponding Author</strong> &nbsp;→&nbsp; Position weight: <strong>35%</strong> &nbsp;→&nbsp; Smith's total credit: <strong>0.350</strong> &nbsp;→&nbsp; Sydney North: <strong>0.263</strong> · SIPFHER: <strong>0.088</strong>
+        </div>
+      </div>
+
+      <table class="matrix-table" style="margin-top:8px">
+        <thead>
+          <tr>
+            <th>Author Position</th>
+            <th>Weight</th>
+            <th>Smith's Total Credit</th>
+            <th>→ Sydney North</th>
+            <th>→ SIPFHER</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>🥇 1st Author</strong></td>
+            <td style="font-weight:700;color:#6C3483">40.0%</td>
+            <td style="font-weight:700">0.400</td>
+            <td style="font-weight:700;color:var(--teal)">0.300</td>
+            <td style="font-weight:700;color:var(--blue)">0.100</td>
+          </tr>
+          <tr>
+            <td><strong>🥈 Last + Corresp.</strong></td>
+            <td style="font-weight:700;color:var(--blue)">35.0%</td>
+            <td style="font-weight:700">0.350</td>
+            <td style="font-weight:700;color:var(--teal)">0.263</td>
+            <td style="font-weight:700;color:var(--blue)">0.088</td>
+          </tr>
+          <tr>
+            <td><strong>👥 5th (Middle)</strong></td>
+            <td style="font-weight:700;color:var(--muted)">3.75%</td>
+            <td style="font-weight:700;color:var(--muted)">0.038</td>
+            <td style="font-weight:700;color:var(--muted)">0.028</td>
+            <td style="font-weight:700;color:var(--muted)">0.009</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note-box" style="border-left-color:#8E44AD;margin-top:16px">
+        <strong style="color:#6C3483">When to use this:</strong> Author position weighting is useful for grant ROI analysis (was the PI first/last author?) and identifying research leadership versus supporting contributions. It is <em>not needed</em> for standard precinct publication counts, where the current paper-level full count model is appropriate.
+      </div>
+    </div>
+
+    <!-- ===== KEY PRINCIPLE ===== -->
+    <div class="recommendation">
+      <h3>The Principle: Accurate Base, Flexible Counting</h3>
+      <p>
+        There does not need to be one ultimate solution. RAMS stores the complete, validated base attribution - every paper linked to every organisation and precinct that is genuinely connected to it. From that foundation, <strong>different counting models can be applied to different reporting scenarios</strong> without re-processing the data. Precinct dashboards use full count. Grant evaluations use fractional. Leadership analysis uses author position weighting. The base data is the same - only the lens changes.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TAB 2: CASE STUDY ==================== -->
+<div class="tab-content">
+  <div class="container">
+    <div class="section-title">Case Study: Professor Smith, CVD Surgeon</div>
+    <div class="section-desc">Walking through exactly how RAMS processes a multi-affiliated researcher's publication across organisations and precincts.</div>
+
+    <div class="stafflink-flow">
+      <div class="sl-step">
+        <div class="sl-num">1</div>
+        <div class="sl-text">
+          <strong>Publication Ingested</strong><br>
+          Prof. Smith publishes a paper in <em>The Lancet</em>. The paper lists three affiliations: "University of Sydney, Faculty of Medicine", "Royal North Shore Hospital, Department of Cardiothoracic Surgery", and "Kolling Institute of Medical Research". No mention of Northern Sydney LHD.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step">
+        <div class="sl-num">2</div>
+        <div class="sl-text">
+          <strong>Entity Resolution - Person</strong><br>
+          RAMS matches the author name to a canonical researcher profile using Levenshtein similarity, ORCID lookup, and co-author network patterns. "Smith, J.A." is resolved to the same person as "John A. Smith" and "J. Smith" from other publications.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step">
+        <div class="sl-num">3</div>
+        <div class="sl-text">
+          <strong>Entity Resolution - Organisation</strong><br>
+          Raw affiliation strings are normalised: "University of Sydney, Faculty of Medicine and Health" → <span class="highlight-text">University of Sydney</span>. "Royal North Shore Hospital, Dept. Cardiothoracic Surg." → <span class="highlight-text">Royal North Shore Hospital</span>. "Kolling Inst. Med. Research" → <span class="highlight-text">Kolling Institute of Medical Research</span>. Each maps to a known organisation in the RAMS reference table.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step">
+        <div class="sl-num">4</div>
+        <div class="sl-text">
+          <strong>Precinct Mapping</strong><br>
+          Using the agreed precinct–organisation mapping table (co-designed with precinct leads), each organisation is allocated to its precinct:<br>
+          &nbsp;• University of Sydney → <span class="highlight-text">SIPFHER Precinct</span><br>
+          &nbsp;• Royal North Shore Hospital → <span class="highlight-text">Sydney North Precinct</span><br>
+          &nbsp;• Kolling Institute → <span class="highlight-text">Sydney North Precinct</span> (same precinct as RNSH)<br>
+          The publication is now linked to <strong>3 organisations across 2 precincts</strong>.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step" style="border-color:var(--blue);border-width:2px">
+        <div class="sl-num" style="background:#6C3483">5</div>
+        <div class="sl-text">
+          <strong>StaffLink Recovery (the missing link)</strong><br>
+          RAMS cross-references the researcher's name/ORCID against StaffLink data extracted from REGIS (or Entra ID). Match found: Prof. Smith's StaffLink ID → Cost Centre 4210 → <span class="highlight-text">Northern Sydney LHD</span>. A fourth affiliation is recovered that was <em>never listed on the paper</em>. NSLHD also maps to <span class="highlight-text">Sydney North Precinct</span>, further strengthening that precinct's claim.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step">
+        <div class="sl-num">6</div>
+        <div class="sl-text">
+          <strong>Attribution Applied - Two Levels</strong><br>
+          <em>Organisation level:</em> Credit is distributed across all 4 organisations (USyd, RNSH, Kolling, NSLHD) using the chosen model.<br>
+          <em>Precinct level:</em> Org credits roll up to precincts. Since 3 of 4 orgs map to Sydney North, that precinct receives a larger share under fractional models (0.75 vs 0.25 for SIPFHER). Under full count, each precinct counts once (1.0 each).
+        </div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>Funding acknowledgement recovery:</strong> If Prof. Smith received an OHMR grant but didn't acknowledge the funding in the paper, RAMS can still find the paper by linking the grant recipient (via REGIS project records) to the publication (via entity resolution). This automates funding acknowledgement compliance without requiring manual follow-up with researchers.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TAB 3: ATTRIBUTION MODELS ==================== -->
+<div class="tab-content">
+  <div class="container">
+    <div class="section-title">Attribution Model Options</div>
+    <div class="section-desc">Five models for handling multi-affiliation attribution, each suited to different analytical purposes. RAMS can apply any of these - the choice depends on the question being asked.</div>
+
+    <div class="models-grid">
+      <!-- Model 1: Full Count -->
+      <div class="model-card">
+        <div class="model-name">1. Full Count (Whole Count) <span class="badge badge-current">Current Default</span></div>
+        <div class="model-aka">Used by: Times Higher Education, most institutional reports</div>
+        <div class="model-desc">Every listed affiliation receives full credit (1.0) for the publication. A paper with 3 affiliations generates a count of 1 for each organisation. This inflates system-wide totals but reflects each institution's genuine involvement.</div>
+        <div class="model-example">
+          <strong>Prof. Smith's Paper (3 listed affiliations)</strong>
+          USyd = 1.0 &nbsp;|&nbsp; RNSH = 1.0 &nbsp;|&nbsp; Kolling = 1.0 &nbsp;|&nbsp; NSLHD = 0.0
+        </div>
+        <div class="pro-con">
+          <div class="pros"><strong>Strengths</strong>No organisation loses credit. Simple to explain. Standard in bibliometrics.</div>
+          <div class="cons"><strong>Limitations</strong>Double-counts at system level. Can't assess fair "share" of output.</div>
+        </div>
+      </div>
+
+      <!-- Model 2: Fractional -->
+      <div class="model-card recommended">
+        <div class="model-name">2. Fractional Count (Pro Rata) <span class="badge badge-recommended">Recommended for Grants</span></div>
+        <div class="model-aka">Used by: Leiden Rankings, CWTS, Norwegian funding model</div>
+        <div class="model-desc">Publication credit is divided equally among all listed affiliations. With 2 affiliations, each gets 0.5. This ensures system-wide total = 1.0 per paper, preventing inflation. Best for evaluating return on investment.</div>
+        <div class="model-example">
+          <strong>Prof. Smith's Paper (3 listed affiliations)</strong>
+          USyd = 0.33 &nbsp;|&nbsp; RNSH = 0.33 &nbsp;|&nbsp; Kolling = 0.33 &nbsp;|&nbsp; NSLHD = 0.0
+        </div>
+        <div class="pro-con">
+          <div class="pros"><strong>Strengths</strong>No double-counting. Fair distribution. Gold standard for funding evaluation.</div>
+          <div class="cons"><strong>Limitations</strong>Penalises collaborative institutions. Hospitals still invisible if not listed.</div>
+        </div>
+      </div>
+
+      <!-- Model 3: First-Listed -->
+      <div class="model-card">
+        <div class="model-name">3. First-Listed (Primary Affiliation)</div>
+        <div class="model-aka">Used by: Some national assessments, simplistic reporting</div>
+        <div class="model-desc">Only the first-listed affiliation receives credit. Reflects the well-known cascade where researchers list university first, then MRI, then hospital. Quick to implement but systematically disadvantages hospitals and MRIs.</div>
+        <div class="model-example">
+          <strong>Prof. Smith's Paper (USyd listed first)</strong>
+          USyd = 1.0 &nbsp;|&nbsp; RNSH = 0.0 &nbsp;|&nbsp; Kolling = 0.0 &nbsp;|&nbsp; NSLHD = 0.0
+        </div>
+        <div class="pro-con">
+          <div class="pros"><strong>Strengths</strong>No inflation. Very simple. No ambiguity.</div>
+          <div class="cons"><strong>Limitations</strong>Deeply unfair. MRIs and hospitals systematically lose. Reinforces university bias.</div>
+        </div>
+      </div>
+
+      <!-- Model 4: Weighted -->
+      <div class="model-card">
+        <div class="model-name">4. Weighted Attribution (Configurable)</div>
+        <div class="model-aka">Used by: Custom institutional analyses</div>
+        <div class="model-desc">Assigns configurable weights based on affiliation order, type, or other signals. For example: 50% to university, 30% to MRI, 20% to hospital. Can incorporate StaffLink data to include unlisted affiliations with a recovery weight.</div>
+        <div class="model-example">
+          <strong>Prof. Smith's Paper (with StaffLink recovery)</strong>
+          USyd = 0.40 &nbsp;|&nbsp; RNSH = 0.25 &nbsp;|&nbsp; Kolling = 0.20 &nbsp;|&nbsp; NSLHD = 0.15
+        </div>
+        <div class="pro-con">
+          <div class="pros"><strong>Strengths</strong>Most nuanced. Configurable per use case. Can account for hierarchy and recovery.</div>
+          <div class="cons"><strong>Limitations</strong>Complex to explain. Weight choices are subjective. Requires stakeholder agreement.</div>
+        </div>
+      </div>
+
+      <!-- Model 5: StaffLink-Enhanced -->
+      <div class="model-card full-width-card" style="border-color:var(--blue);border-width:2px">
+        <div class="model-name">5. StaffLink-Enhanced Attribution <span class="badge badge-stafflink">RAMS Unique Capability</span></div>
+        <div class="model-aka">Not available in any commercial bibliometric platform (Scopus, Dimensions, OpenAlex)</div>
+        <div class="model-desc">
+          This is RAMS' competitive differentiator. By linking StaffLink IDs (from REGIS user data or Entra ID) to cost centres and employing organisations, RAMS can recover affiliations that researchers never listed on their publications. This is the only method that addresses the systematic hospital undercount problem.
+          <br><br>
+          StaffLink enhancement can be combined with <em>any</em> of the above models. For example, "Full Count + StaffLink" gives every organisation (including recovered hospitals) a count of 1.0, while "Fractional + StaffLink" divides the publication equally among all affiliations including the recovered one.
+        </div>
+        <div class="model-example">
+          <strong>Prof. Smith's Paper - Full Count + StaffLink</strong>
+          USyd = 1.0 &nbsp;|&nbsp; RNSH = 1.0 &nbsp;|&nbsp; Kolling = 1.0 &nbsp;|&nbsp; NSLHD = 1.0 (recovered)
+          <br>→ Precinct rollup: Sydney North = 1.0 &nbsp;|&nbsp; SIPFHER = 1.0
+          <br><br>
+          <strong>Prof. Smith's Paper - Fractional + StaffLink</strong>
+          USyd = 0.25 &nbsp;|&nbsp; RNSH = 0.25 &nbsp;|&nbsp; Kolling = 0.25 &nbsp;|&nbsp; NSLHD = 0.25 (recovered)
+          <br>→ Precinct rollup: Sydney North = 0.75 &nbsp;|&nbsp; SIPFHER = 0.25
+        </div>
+        <div class="pro-con">
+          <div class="pros"><strong>Strengths</strong>Recovers hidden hospital output. Addresses funding acknowledgement gaps. Unique to RAMS - no competitor can do this.</div>
+          <div class="cons"><strong>Limitations</strong>Requires StaffLink/Entra ID access approval. Coverage depends on REGIS participation. Career transitions may lag.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Use Case Decision Table -->
+    <div class="card" style="margin-top:28px">
+      <div class="card-title">Which Model For Which Purpose?</div>
+      <table class="usecase-table">
+        <thead>
+          <tr>
+            <th>Use Case</th>
+            <th>Recommended Model</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Precinct research strength profiling</strong></td>
+            <td>Full Count + StaffLink</td>
+            <td>Need complete picture of all research activity connected to a precinct, regardless of where credit goes</td>
+          </tr>
+          <tr>
+            <td><strong>OHMR grant evaluation / ROI</strong></td>
+            <td>Fractional + StaffLink</td>
+            <td>Must count each publication once while fairly distributing credit across all contributing organisations</td>
+          </tr>
+          <tr>
+            <td><strong>Hospital research output reporting (SO5)</strong></td>
+            <td>StaffLink-Enhanced (Full Count)</td>
+            <td>Recovers the hospital attribution that is systematically omitted from publications</td>
+          </tr>
+          <tr>
+            <td><strong>International benchmarking</strong></td>
+            <td>Full Count (no StaffLink)</td>
+            <td>Aligns with standard international methodology (THE, QS, Leiden) for comparability</td>
+          </tr>
+          <tr>
+            <td><strong>Funding acknowledgement compliance</strong></td>
+            <td>REGIS-linked attribution</td>
+            <td>Cross-reference OHMR grant recipients with publications to find unacknowledged outputs</td>
+          </tr>
+          <tr>
+            <td><strong>Network / collaboration analysis</strong></td>
+            <td>Full Count (all affiliations)</td>
+            <td>Every affiliation link matters for mapping research networks and cross-institutional collaboration</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="recommendation">
+      <h3>Recommended Approach</h3>
+      <p>
+        RAMS should implement <strong>multiple attribution models simultaneously</strong> rather than choosing one. The platform can store the full affiliation data and apply the appropriate model at the point of reporting. This means precinct dashboards use Full Count + StaffLink for comprehensive mapping, while grant evaluation reports use Fractional + StaffLink for fair distribution. The underlying data is the same - only the counting logic changes. This is a configuration choice, not a data architecture change.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TAB 4: STAFFLINK ==================== -->
+<div class="tab-content">
+  <div class="container">
+    <div class="section-title">StaffLink Enhancement: Recovering Hidden Hospital Output</div>
+    <div class="section-desc">How RAMS uses StaffLink data to attribute publications to hospitals and LHDs even when the researcher didn't list them - addressing the systematic hospital undercount.</div>
+
+    <!-- The two methods -->
+    <div class="models-grid">
+      <div class="model-card">
+        <div class="model-name">Method A: REGIS User Data <span class="badge badge-current">Currently Available</span></div>
+        <div class="model-desc">
+          When researchers submit ethics applications through REGIS, they enter their StaffLink ID and employing organisation. RAMS extracts this to build a researcher → hospital mapping. This is the primary method currently in use.
+        </div>
+        <div class="model-example">
+          <strong>Coverage</strong>
+          Covers all researchers who have submitted ethics applications through REGIS. Misses researchers who publish but don't require ethics approval (e.g., systematic reviews, commentary, methods papers).
+        </div>
+      </div>
+
+      <div class="model-card" style="border-color:var(--blue);border-width:2px">
+        <div class="model-name">Method B: Microsoft Entra ID (Graph API) <span class="badge badge-stafflink">Pending Approval</span></div>
+        <div class="model-desc">
+          NSW Health's Entra ID (formerly Azure AD) contains every NSW Health employee with their StaffLink ID, cost centre, department, and employing organisation. Access via Microsoft Graph API would give RAMS a complete staff directory for matching.
+        </div>
+        <div class="model-example">
+          <strong>Coverage</strong>
+          Every NSW Health employee - comprehensive and authoritative. Requires data governance approval (currently being pursued via Hamid/Herme). Once approved, this becomes a simple A-to-B lookup with no fuzzy matching needed.
+        </div>
+      </div>
+    </div>
+
+    <!-- How StaffLink addresses key attribution questions -->
+    <div class="card" style="margin-top:8px">
+      <div class="card-title">How StaffLink Addresses Key Attribution Questions</div>
+
+      <div style="margin-bottom:20px">
+        <strong style="color:var(--blue);font-size:14px">Q1: How do we correctly attribute publications to hospitals even when not acknowledged?</strong>
+        <p style="font-size:13px;margin-top:6px;line-height:1.7">StaffLink provides the employment relationship independent of publication metadata. If a researcher is employed by Royal Prince Alfred Hospital (confirmed by StaffLink), then all their publications are linked to RPAH/Sydney LHD regardless of what they wrote on the paper. The publication affiliation data shows where they <em>said</em> they work; StaffLink shows where they <em>actually</em> work.</p>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <strong style="color:var(--blue);font-size:14px">Q2: How do we find publications where OHMR funding wasn't acknowledged?</strong>
+        <p style="font-size:13px;margin-top:6px;line-height:1.7">RAMS links REGIS grant records to researcher profiles. If Dr. X received an OHMR-administered grant (recorded in REGIS), and Dr. X published a paper (found via PubMed/Crossref), RAMS can flag papers published during or after the grant period that don't include an OHMR acknowledgement. This is automated - no need to ask researchers directly.</p>
+      </div>
+
+      <div>
+        <strong style="color:var(--blue);font-size:14px">Q3: How do we use StaffLink for fair pro-rata attribution including hospitals and MRIs?</strong>
+        <p style="font-size:13px;margin-top:6px;line-height:1.7">By recovering the LHD affiliation via StaffLink, RAMS increases the denominator in fractional counting. Instead of splitting a publication three ways between university, hospital, and MRI (ignoring the LHD), it becomes four ways - 0.25 each. At the precinct level, since RNSH, Kolling, and NSLHD all map to Sydney North, that precinct's share becomes 0.75 versus SIPFHER's 0.25. The total still sums to 1.0, but the distribution is fairer.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TAB 5: SENSITIVITY ==================== -->
+<div class="tab-content">
+  <div class="container">
+    <div class="section-title">Sensitivity Analysis & Confidence Framework</div>
+    <div class="section-desc">How much "error" might exist in RAMS attribution, and how confidence levels are communicated transparently.</div>
+
+    <div class="card">
+      <div class="card-title">Attribution Confidence Tiers</div>
+      <p style="font-size:13px;margin-bottom:16px;line-height:1.7">Not all attributions carry the same confidence. RAMS classifies every researcher–organisation link into three tiers based on the strength of evidence.</p>
+
+      <div class="confidence-bar">
+        <div class="conf-segment conf-high" style="width:65%">~65%</div>
+        <div class="conf-segment conf-med" style="width:25%">~25%</div>
+        <div class="conf-segment conf-low" style="width:10%">~10%</div>
+      </div>
+      <div class="conf-legend">
+        <span><div class="conf-dot" style="background:var(--teal)"></div> High Confidence</span>
+        <span><div class="conf-dot" style="background:var(--gold)"></div> Moderate Confidence</span>
+        <span><div class="conf-dot" style="background:var(--coral)"></div> Low Confidence / Flagged</span>
+      </div>
+    </div>
+
+    <div class="models-grid" style="margin-top:24px">
+      <div class="model-card">
+        <div class="model-name" style="color:var(--teal)">High Confidence (~65% of attributions)</div>
+        <div class="model-desc">Strong evidence from multiple independent sources confirming the match.</div>
+        <div class="model-example">
+          <strong>Evidence Signals</strong>
+          ORCID exact match &nbsp;•&nbsp; StaffLink ID confirmed &nbsp;•&nbsp; Multiple publications with same affiliation string &nbsp;•&nbsp; DOI-based deduplication &nbsp;•&nbsp; Co-author network consistency
+        </div>
+        <p style="font-size:12px;color:var(--teal);font-weight:600">Estimated error rate: &lt;2%</p>
+      </div>
+
+      <div class="model-card">
+        <div class="model-name" style="color:#B7950B">Moderate Confidence (~25% of attributions)</div>
+        <div class="model-desc">Good match from algorithmic resolution but fewer confirming signals. Typical for researchers without ORCID or with common names.</div>
+        <div class="model-example">
+          <strong>Evidence Signals</strong>
+          Fuzzy name match (≥80% Levenshtein) &nbsp;•&nbsp; Affiliation string match &nbsp;•&nbsp; Research domain consistency &nbsp;•&nbsp; Single source confirmation
+        </div>
+        <p style="font-size:12px;color:#B7950B;font-weight:600">Estimated error rate: 5–10%</p>
+      </div>
+
+      <div class="model-card full-width-card">
+        <div class="model-name" style="color:var(--coral)">Low Confidence / Flagged (~10% of attributions)</div>
+        <div class="model-desc">Ambiguous matches flagged for manual review. Typically involve common names (e.g., "J. Wang"), incomplete affiliation strings, or researchers who have recently changed institutions.</div>
+        <div class="model-example">
+          <strong>Evidence Signals</strong>
+          Name-only match with common surname &nbsp;•&nbsp; Conflicting affiliation signals &nbsp;•&nbsp; No ORCID &nbsp;•&nbsp; Cross-institution career transition detected &nbsp;•&nbsp; Incomplete metadata
+        </div>
+        <p style="font-size:12px;color:var(--coral);font-weight:600">Estimated error rate: 15–25% (before manual review)</p>
+      </div>
+    </div>
+
+    <!-- Sensitivity Analysis Approach -->
+    <div class="card" style="margin-top:24px">
+      <div class="card-title">Proposed Sensitivity Analysis Methodology</div>
+      <p style="font-size:13px;line-height:1.8;margin-bottom:16px">To quantify attribution error, we propose a stratified sampling approach:</p>
+      
+      <table class="usecase-table">
+        <thead>
+          <tr>
+            <th>Step</th>
+            <th>Method</th>
+            <th>Sample Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Random sample per tier</strong></td>
+            <td>Draw random publications from each confidence tier and manually verify attribution accuracy</td>
+            <td>50 per tier (150 total)</td>
+          </tr>
+          <tr>
+            <td><strong>2. Known-researcher validation</strong></td>
+            <td>Select senior researchers with known affiliations and check all their publications for correct attribution</td>
+            <td>10–15 researchers</td>
+          </tr>
+          <tr>
+            <td><strong>3. Cross-source comparison</strong></td>
+            <td>Compare RAMS attributions against ORCID profiles and institutional repositories where available</td>
+            <td>200 publications</td>
+          </tr>
+          <tr>
+            <td><strong>4. Error classification</strong></td>
+            <td>Categorise errors: false positive (wrong attribution), false negative (missed attribution), partial (correct person, wrong org)</td>
+            <td>All errors from steps 1–3</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note-box" style="margin-top:20px">
+        <strong>Researcher-level validation:</strong> Using senior researchers' own publication portfolios as validation case studies is a highly effective approach. It demonstrates the system's capability in a tangible way, builds confidence in the methodology, and produces reusable examples for stakeholder engagement. RAMS can show exactly where each publication was attributed, which affiliations were detected, and whether any were missed.
+      </div>
+    </div>
+
+    <div class="recommendation">
+      <h3>Transparency in Attribution Accuracy</h3>
+      <p>
+        No entity resolution system achieves 100% accuracy, and RAMS does not claim otherwise. The right approach is transparency: show the confidence tiers, report error rates by tier, and demonstrate the validation methodology. This positions RAMS as a rigorous and trustworthy platform rather than a black box. The >95% overall accuracy achieved on the Sydney North dataset provides a strong baseline, and the tiered confidence framework gives stakeholders the nuance to understand where the system is strongest and where manual review adds value.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RAMS FOOTER ===== -->
+<footer style="margin-top:64px;border-top:1px solid #E8ECF0;background:#FAFBFC;">
+  <div style="max-width:1200px;margin:0 auto;padding:28px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#0C1F3F,#1A5276);display:flex;align-items:center;justify-content:center;color:white;font-family:'Fraunces',serif;font-weight:700;font-size:14px">R+</div>
+      <div>
+        <div style="font-weight:700;font-size:13px;color:#0C1F3F;letter-spacing:0.3px">RAMS</div>
+        <div style="font-size:11px;color:#7F8C8D">Research Activity Monitoring System</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#7F8C8D;text-align:right">
+      <a href="https://www.linkedin.com/in/yagizalpaksoy/" target="_blank" rel="noopener" style="color:#1A5276;text-decoration:none;font-weight:600">Dr Yagiz Aksoy MD PhD</a>
+      <span style="margin:0 6px;color:#D5D8DC">·</span>
+      Office for Health and Medical Research, NSW Health
+    </div>
+  </div>
+</footer>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const contents = document.querySelectorAll('.tab-content');
+
+  function showTab(index) {
+    tabs.forEach(t => t.classList.remove('active'));
+    contents.forEach(c => c.classList.remove('active'));
+    tabs[index].classList.add('active');
+    contents[index].classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showScenario(index) {
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.scenario-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.scenario-btn')[index].classList.add('active');
+    document.getElementById('scenario-' + index).classList.add('active');
+  }
+</script>
+
+</body>
+</html>
