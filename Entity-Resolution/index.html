@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RAMS Multi-Affiliation Attribution Framework</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
   :root {
     --navy: #0C1F3F;
@@ -32,9 +32,23 @@
   }
 
   .header {
-    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    background: linear-gradient(135deg, var(--navy) 0%, #0F2B52 40%, var(--blue) 100%);
     color: white;
     padding: 48px 40px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,160,23,0.08) 0%, transparent 70%);
+    pointer-events: none;
   }
 
   .header h1 {
@@ -43,12 +57,14 @@
     font-weight: 700;
     margin-bottom: 8px;
     letter-spacing: -0.5px;
+    position: relative;
   }
 
   .header .subtitle {
     font-size: 15px;
     opacity: 0.75;
     font-weight: 400;
+    position: relative;
   }
 
   .container {
@@ -67,11 +83,16 @@
     top: 0;
     z-index: 100;
     padding: 0 40px;
+    box-shadow: 0 2px 8px rgba(12,31,63,0.04);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
+  .tabs::-webkit-scrollbar { height: 0; display: none; }
+
   .tab {
-    padding: 16px 24px;
-    font-size: 14px;
+    padding: 16px 18px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--muted);
     cursor: pointer;
@@ -411,7 +432,7 @@
   .output-box { background: #FDEBD0; color: #B7950B; border: 1px solid #F9E79F; }
   .stafflink-box { background: #E8DAEF; color: #6C3483; border: 1px solid #D2B4DE; }
 
-  /* Sensitivity section */
+  /* Confidence bar */
   .confidence-bar {
     display: flex;
     height: 36px;
@@ -659,6 +680,7 @@
     color: var(--blue);
     border: none;
     transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
   }
 
   .scenario-btn.active {
@@ -706,46 +728,418 @@
   .formula-org { background: rgba(26,82,118,0.3); }
   .formula-result { background: rgba(20,143,119,0.3); }
 
-  /* ====== NEW: Grant attribution badge ====== */
-  .badge-grant { background: #D5F5E3; color: #1E8449; }
-
-  /* ====== NEW: Grant scenario toggle ====== */
-  .grant-scenario-toggle {
-    display: flex;
-    gap: 0;
-    margin: 24px 0 16px;
-    border-radius: 8px;
+  /* ====== EXECUTIVE SUMMARY TAB ====== */
+  .exec-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    border-radius: 16px;
+    padding: 36px;
+    color: white;
+    margin-bottom: 32px;
+    position: relative;
     overflow: hidden;
-    border: 2px solid #1E8449;
-    max-width: 600px;
   }
 
-  .grant-scenario-btn {
-    flex: 1;
-    padding: 12px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
+  .exec-hero::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,160,23,0.12) 0%, transparent 70%);
+  }
+
+  .exec-hero h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .exec-hero p {
+    font-size: 14px;
+    opacity: 0.85;
+    max-width: 700px;
+    line-height: 1.7;
+    position: relative;
+  }
+
+  .exec-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 800px) {
+    .exec-kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .kpi-card {
     background: white;
-    color: #1E8449;
-    border: none;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+
+  .kpi-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .kpi-value {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Scenario Builder */
+  .scenario-builder {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    padding: 36px;
+    margin-bottom: 32px;
+  }
+
+  .scenario-builder h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+
+  .scenario-builder .sb-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  .sb-controls {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 36px;
+  }
+
+  @media (max-width: 800px) {
+    .sb-controls { grid-template-columns: 1fr; }
+  }
+
+  .sb-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .sb-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--navy);
+    margin-bottom: 10px;
+  }
+
+  .sb-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sb-radio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .sb-radio:hover {
+    border-color: var(--blue);
+    background: #F8FBFE;
+  }
+
+  .sb-radio.active {
+    border-color: var(--blue);
+    background: #EBF5FB;
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .sb-radio input { display: none; }
+
+  .sb-radio .radio-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    position: relative;
+    flex-shrink: 0;
     transition: all 0.2s;
   }
 
-  .grant-scenario-btn.active {
-    background: #1E8449;
+  .sb-radio.active .radio-dot {
+    border-color: var(--blue);
+  }
+
+  .sb-radio.active .radio-dot::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+
+  .sb-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .sb-toggle:hover {
+    border-color: var(--blue);
+  }
+
+  .sb-toggle.active {
+    border-color: var(--teal);
+    background: #E8F8F5;
+  }
+
+  .toggle-switch {
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    background: #D5D8DC;
+    position: relative;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: white;
+    transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .sb-toggle.active .toggle-switch {
+    background: var(--teal);
+  }
+
+  .sb-toggle.active .toggle-switch::after {
+    left: 18px;
+  }
+
+  /* Result bars */
+  .sb-results {
+    flex: 1;
+  }
+
+  .sb-results-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--navy);
+    margin-bottom: 20px;
+  }
+
+  .sb-bar-group {
+    margin-bottom: 16px;
+  }
+
+  .sb-bar-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+
+  .sb-bar-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .sb-bar-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .sb-bar-track {
+    height: 28px;
+    background: #F0F3F5;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .sb-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 11px;
+    font-weight: 600;
     color: white;
+    min-width: 2px;
   }
 
-  .grant-scenario-btn:hover:not(.active) {
-    background: #D5F5E3;
+  .sb-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--navy);
+    color: white;
+    border-radius: 10px;
+    margin-top: 20px;
   }
 
-  .grant-scenario-panel { display: none; }
-  .grant-scenario-panel.active { display: block; }
+  .sb-total-label {
+    font-size: 13px;
+    font-weight: 600;
+  }
 
-  .cell-grant { background: #D5F5E3; color: #1E8449; font-weight: 700; }
+  .sb-total-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: #F9E79F;
+  }
+
+  /* ====== DATA QUALITY TAB ====== */
+  .cm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    max-width: 500px;
+    margin: 20px auto;
+    background: var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .cm-cell {
+    padding: 20px;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .cm-cell .cm-count {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .cm-cell .cm-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .cm-tp { background: #E8F8F5; color: var(--teal); }
+  .cm-fp { background: #FEF9E7; color: #B7950B; }
+  .cm-fn { background: #FDEDEC; color: var(--coral); }
+  .cm-tn { background: #EBF5FB; color: var(--blue); }
+
+  .cm-axis-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin: 8px 0;
+  }
+
+  .metric-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin: 24px 0;
+  }
+
+  .metric-pill {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    min-width: 140px;
+  }
+
+  .metric-pill .mp-value {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .metric-pill .mp-name {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
+
+  /* Calibration curve canvas */
+  .calibration-container {
+    position: relative;
+    max-width: 500px;
+    margin: 20px auto;
+  }
+
+  .calibration-container canvas {
+    width: 100%;
+    height: auto;
+  }
 </style>
 </head>
 <body>
@@ -765,18 +1159,104 @@
 </div>
 
 <div class="tabs">
-  <div class="tab active" onclick="showTab(0)">Attribution Matrix</div>
-  <div class="tab" onclick="showTab(1)">Case Study</div>
-  <div class="tab" onclick="showTab(2)">Attribution Models</div>
+  <div class="tab active" onclick="showTab(0)">Executive Summary</div>
+  <div class="tab" onclick="showTab(1)">Attribution Framework</div>
+  <div class="tab" onclick="showTab(2)">Case Study</div>
   <div class="tab" onclick="showTab(3)">StaffLink Enhancement</div>
-  <div class="tab" onclick="showTab(4)">Sensitivity & Confidence</div>
-  <div class="tab" onclick="showTab(5)">The Counting Problem</div>
+  <div class="tab" onclick="showTab(4)">Data Quality & Validation</div>
+  <div class="tab" onclick="showTab(5)">Evidence: Who Uses What</div>
   <div class="tab" onclick="showTab(6)">Worked Examples</div>
+  <div class="tab" onclick="showTab(7)">References</div>
 </div>
 
 
-<!-- ==================== TAB 1: ATTRIBUTION MATRIX ==================== -->
+<!-- ==================== TAB 1: EXECUTIVE SUMMARY ==================== -->
 <div class="tab-content active">
+  <div class="container">
+
+    <div class="exec-hero">
+      <h2>The Attribution Challenge in Multi-Institutional Health Research</h2>
+      <p>Health researchers routinely hold multiple affiliations -  a surgeon may be employed by a hospital, hold a university appointment, and work within a medical research institute. When they publish, only some affiliations appear on the paper. This creates a well-documented measurement problem in bibliometrics: the same publication can be counted multiple times (inflating output) or not counted at all for a contributing institution (making research invisible).</p>
+      <p style="margin-top:12px">RAMS addresses this through entity resolution - linking records across 15+ data sources to build a complete attribution map. <strong>The current RAMS implementation uses Full Count attribution</strong> - the same default method used by SciVal (Elsevier), InCites (Clarivate), THE and QS World University Rankings - ensuring direct comparability with international benchmarks. Critically, the system is deliberately architected to support additional counting methods at query time without reprocessing data, including the <strong>Leiden Ranking fractional counting model</strong> (Waltman &amp; van Eck, 2015), the <strong>Norwegian Model of Modified Fractional Counting</strong> (Sivertsen et al., 2019), and author-position weighting (Hagen, 2010). This means that as OHMR's reporting needs evolve, RAMS can readily adopt any established bibliometric counting method without rebuilding the data pipeline.</p>
+    </div>
+
+    <!-- Interactive Scenario Builder -->
+    <div class="scenario-builder">
+      <h3>Interactive Scenario Builder</h3>
+      <div class="sb-desc">Select a counting model and toggle StaffLink to see how credit is distributed for a sample paper with 4 affiliated organisations across 2 precincts.</div>
+
+      <div class="sb-controls">
+        <div class="sb-panel">
+          <div class="sb-group">
+            <label>Attribution Model</label>
+            <div class="sb-radio-group" id="sb-model-group">
+              <div class="sb-radio active" onclick="selectModel('full')">
+                <div class="radio-dot"></div>
+                <span>Full Count</span>
+              </div>
+              <div class="sb-radio" onclick="selectModel('fractional')">
+                <div class="radio-dot"></div>
+                <span>Fractional (Pro Rata)</span>
+              </div>
+              <div class="sb-radio" onclick="selectModel('first')">
+                <div class="radio-dot"></div>
+                <span>First-Listed Only</span>
+              </div>
+              <div class="sb-radio" onclick="selectModel('weighted')">
+                <div class="radio-dot"></div>
+                <span>Weighted Attribution</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sb-group">
+            <label>Enhancement</label>
+            <div class="sb-toggle active" id="sb-stafflink-toggle" onclick="toggleStaffLink()">
+              <div class="toggle-switch"></div>
+              <span>StaffLink Recovery</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sb-results" id="sb-results">
+          <div class="sb-results-title">Organisation Credit from One Paper</div>
+          <!-- Bars rendered by JS -->
+          <div id="sb-bars"></div>
+          <div class="sb-total">
+            <div class="sb-total-label">System Total</div>
+            <div class="sb-total-value" id="sb-total">4.00</div>
+          </div>
+
+          <div style="margin-top:20px">
+            <div class="sb-results-title">Precinct Rollup</div>
+            <div id="sb-precinct-bars"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Principles -->
+    <div class="card" style="border:2px solid var(--navy)">
+      <div class="card-title" style="font-size:18px">Core Design Principles</div>
+      <p style="font-size:14px;line-height:1.8">
+        <strong>1. Papers count, not people.</strong> One paper with 100 authors still counts as one paper. If <em>any</em> author lists an affiliation, that organisation gets credit. This follows the standard bibliometric unit of analysis established in the Leiden Ranking methodology (Waltman & van Eck, 2015).<br><br>
+        <strong>2. Get the base attribution right first.</strong> Before any counting model is applied, RAMS must correctly answer: which organisations are genuinely connected to this paper, and which precincts do those organisations belong to? This is fundamentally a record linkage problem, addressed using the Fellegi–Sunter probabilistic record linkage framework (Fellegi & Sunter, 1969) combined with deterministic key matching.<br><br>
+        <strong>3. Multiple models, one data foundation.</strong> The bibliometric literature has debated counting methods for over 40 years (Gauffriau, 2021). The answer is that it depends on the question being asked. RAMS stores granular author–affiliation data and applies the appropriate counting model at query time -  full count, fractional (Perianes-Rodriguez et al., 2016), modified fractional (Sivertsen et al., 2019), or author-position weighted (Hagen, 2010).
+      </p>
+    </div>
+
+    <div class="recommendation">
+      <h3>The Principle: Accurate Base, Flexible Counting</h3>
+      <p>
+        RAMS stores the complete, validated base attribution -  every paper linked to every organisation and precinct that is genuinely connected to it. From that foundation, <strong>different counting models can be applied to different reporting scenarios</strong> without re-processing the data. This approach follows the architectural principle advocated by Gauffriau (2021): separate the data layer from the counting layer. Precinct dashboards use full count (comparable to SciVal/InCites). Grant evaluations use fractional counting (Leiden standard). Leadership analysis uses author-position weighting (Hagen, 2010). The base data is the same -  only the analytical lens changes.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ==================== TAB 2: ATTRIBUTION FRAMEWORK (MERGED TAB 1 + TAB 3) ==================== -->
+<div class="tab-content">
   <div class="container">
     <div class="section-title">How RAMS Attributes Publications</div>
     <div class="section-desc">RAMS counts papers, not people. The foundational principle is simple: if an organisation has <em>any</em> author affiliated with a paper, that organisation gets +1. Different counting models can then be layered on top - but the base attribution must be right first.</div>
@@ -790,7 +1270,10 @@
 
       <div style="background:#E8F8F5;border-radius:10px;padding:20px 24px;margin-bottom:24px">
         <p style="font-size:15px;line-height:1.8;color:var(--navy);font-weight:500;margin:0">
-          It is the <strong>paper</strong> that counts, not the person. One paper with 100 authors still counts as <strong>one paper</strong> - regardless of whether 100 of those authors are affiliated with a precinct organisation or only 1 out of 100 is. If <em>any</em> author lists an affiliation, that organisation gets <strong>+1</strong>. At the precinct level, the same logic applies: if <em>any</em> organisation within a precinct is represented, that precinct gets <strong>+1</strong>.
+          It is the <strong>paper</strong> that counts, not the person. One paper with 100 authors still counts as <strong>one paper</strong> -  regardless of whether 100 of those authors are affiliated with a precinct organisation or only 1 out of 100 is. If <em>any</em> author lists an affiliation, that organisation gets <strong>+1</strong>. At the precinct level, the same logic applies: if <em>any</em> organisation within a precinct is represented, that precinct gets <strong>+1</strong>.
+        </p>
+        <p style="font-size:13px;line-height:1.7;color:var(--muted);margin-top:12px">
+          This is the default method used by SciVal (Elsevier), InCites (Clarivate), THE World University Rankings, and QS Rankings -  making it directly comparable to international benchmarks (Waltman & van Eck, 2015). Full count is the most commonly used approach in institutional bibliometrics but systematically inflates aggregate totals when researchers hold multiple affiliations (Perianes-Rodriguez et al., 2016).
         </p>
       </div>
 
@@ -910,11 +1393,11 @@
     <!-- ===== ALTERNATIVE OPTIONS ===== -->
     <div class="flow-container" style="border-color:var(--border)">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <span style="background:var(--gold);color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">OPTIONS</span>
-        <span class="flow-title" style="margin:0;text-align:left">Alternative Counting Models - Applied Per Scenario</span>
+        <span style="background:var(--gold);color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">AVAILABLE METHODS</span>
+        <span class="flow-title" style="margin:0;text-align:left">Alternative Counting Models - Supported by RAMS Architecture</span>
       </div>
 
-      <p style="font-size:13px;color:var(--muted);margin-bottom:20px">These models sit on top of the same base attribution data. The choice of model depends on the question being asked - and different reports can use different models simultaneously.</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px">RAMS currently uses Full Count as the default attribution method. However, because the system stores granular author-affiliation-organisation data at the record level, the following alternative counting methods can be activated at query time without any changes to the underlying data pipeline. These methods are architecturally supported and can be enabled as reporting requirements evolve.</p>
 
       <!-- Same example paper, different models -->
       <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px">
@@ -1128,87 +1611,8 @@
       </div>
     </div>
 
-    <!-- ===== KEY PRINCIPLE ===== -->
-    <div class="recommendation">
-      <h3>The Principle: Accurate Base, Flexible Counting</h3>
-      <p>
-        There does not need to be one ultimate solution. RAMS stores the complete, validated base attribution - every paper linked to every organisation and precinct that is genuinely connected to it. From that foundation, <strong>different counting models can be applied to different reporting scenarios</strong> without re-processing the data. Precinct dashboards use full count. Grant evaluations use fractional. Leadership analysis uses author position weighting. The base data is the same - only the lens changes.
-      </p>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== TAB 2: CASE STUDY ==================== -->
-<div class="tab-content">
-  <div class="container">
-    <div class="section-title">Case Study: Professor Smith, CVD Surgeon</div>
-    <div class="section-desc">Walking through exactly how RAMS processes a multi-affiliated researcher's publication across organisations and precincts.</div>
-
-    <div class="stafflink-flow">
-      <div class="sl-step">
-        <div class="sl-num">1</div>
-        <div class="sl-text">
-          <strong>Publication Ingested</strong><br>
-          Prof. Smith publishes a paper in <em>The Lancet</em>. The paper lists three affiliations: "University of Sydney, Faculty of Medicine", "Royal North Shore Hospital, Department of Cardiothoracic Surgery", and "Kolling Institute of Medical Research". No mention of Northern Sydney LHD.
-        </div>
-      </div>
-      <div class="sl-connector"></div>
-      <div class="sl-step">
-        <div class="sl-num">2</div>
-        <div class="sl-text">
-          <strong>Entity Resolution - Person</strong><br>
-          RAMS matches the author name to a canonical researcher profile using Levenshtein similarity, ORCID lookup, and co-author network patterns. "Smith, J.A." is resolved to the same person as "John A. Smith" and "J. Smith" from other publications.
-        </div>
-      </div>
-      <div class="sl-connector"></div>
-      <div class="sl-step">
-        <div class="sl-num">3</div>
-        <div class="sl-text">
-          <strong>Entity Resolution - Organisation</strong><br>
-          Raw affiliation strings are normalised: "University of Sydney, Faculty of Medicine and Health" → <span class="highlight-text">University of Sydney</span>. "Royal North Shore Hospital, Dept. Cardiothoracic Surg." → <span class="highlight-text">Royal North Shore Hospital</span>. "Kolling Inst. Med. Research" → <span class="highlight-text">Kolling Institute of Medical Research</span>. Each maps to a known organisation in the RAMS reference table.
-        </div>
-      </div>
-      <div class="sl-connector"></div>
-      <div class="sl-step">
-        <div class="sl-num">4</div>
-        <div class="sl-text">
-          <strong>Precinct Mapping</strong><br>
-          Using the agreed precinct–organisation mapping table (co-designed with precinct leads), each organisation is allocated to its precinct:<br>
-          &nbsp;• University of Sydney → <span class="highlight-text">SIPFHER Precinct</span><br>
-          &nbsp;• Royal North Shore Hospital → <span class="highlight-text">Sydney North Precinct</span><br>
-          &nbsp;• Kolling Institute → <span class="highlight-text">Sydney North Precinct</span> (same precinct as RNSH)<br>
-          The publication is now linked to <strong>3 organisations across 2 precincts</strong>.
-        </div>
-      </div>
-      <div class="sl-connector"></div>
-      <div class="sl-step" style="border-color:var(--blue);border-width:2px">
-        <div class="sl-num" style="background:#6C3483">5</div>
-        <div class="sl-text">
-          <strong>StaffLink Recovery (the missing link)</strong><br>
-          RAMS cross-references the researcher's name/ORCID against StaffLink data extracted from REGIS (or Entra ID). Match found: Prof. Smith's StaffLink ID → Cost Centre 4210 → <span class="highlight-text">Northern Sydney LHD</span>. A fourth affiliation is recovered that was <em>never listed on the paper</em>. NSLHD also maps to <span class="highlight-text">Sydney North Precinct</span>, further strengthening that precinct's claim.
-        </div>
-      </div>
-      <div class="sl-connector"></div>
-      <div class="sl-step">
-        <div class="sl-num">6</div>
-        <div class="sl-text">
-          <strong>Attribution Applied - Two Levels</strong><br>
-          <em>Organisation level:</em> Credit is distributed across all 4 organisations (USyd, RNSH, Kolling, NSLHD) using the chosen model.<br>
-          <em>Precinct level:</em> Org credits roll up to precincts. Since 3 of 4 orgs map to Sydney North, that precinct receives a larger share under fractional models (0.75 vs 0.25 for SIPFHER). Under full count, each precinct counts once (1.0 each).
-        </div>
-      </div>
-    </div>
-
-    <div class="note-box">
-      <strong>Funding acknowledgement recovery:</strong> If Prof. Smith received an OHMR grant but didn't acknowledge the funding in the paper, RAMS can still find the paper by linking the grant recipient (via REGIS project records) to the publication (via entity resolution). This automates funding acknowledgement compliance without requiring manual follow-up with researchers.
-    </div>
-  </div>
-</div>
-
-<!-- ==================== TAB 3: ATTRIBUTION MODELS ==================== -->
-<div class="tab-content">
-  <div class="container">
-    <div class="section-title">Attribution Model Options</div>
+    <!-- ===== DETAILED MODEL DESCRIPTIONS (from old Tab 3) ===== -->
+    <div class="section-title" style="margin-top:40px">Attribution Model Options - Detailed</div>
     <div class="section-desc">Five models for handling multi-affiliation attribution, each suited to different analytical purposes. RAMS can apply any of these - the choice depends on the question being asked.</div>
 
     <div class="models-grid">
@@ -1352,7 +1756,76 @@
   </div>
 </div>
 
-<!-- ==================== TAB 4: STAFFLINK ==================== -->
+
+<!-- ==================== TAB 3: CASE STUDY (unchanged) ==================== -->
+<div class="tab-content">
+  <div class="container">
+    <div class="section-title">Case Study: Professor Smith, CVD Surgeon</div>
+    <div class="section-desc">Walking through exactly how RAMS processes a multi-affiliated researcher's publication across organisations and precincts.</div>
+
+    <div class="stafflink-flow">
+      <div class="sl-step">
+        <div class="sl-num">1</div>
+        <div class="sl-text">
+          <strong>Publication Ingested</strong><br>
+          Prof. Smith publishes a paper in <em>The Lancet</em>. The paper lists three affiliations: "University of Sydney, Faculty of Medicine", "Royal North Shore Hospital, Department of Cardiothoracic Surgery", and "Kolling Institute of Medical Research". No mention of Northern Sydney LHD.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step">
+        <div class="sl-num">2</div>
+        <div class="sl-text">
+          <strong>Entity Resolution -  Person</strong><br>
+          RAMS matches the author name to a canonical researcher profile using a cascading pipeline based on the Fellegi–Sunter probabilistic record linkage framework (1969): first by ORCID exact match, then by Levenshtein distance-based fuzzy name matching (≥80% similarity threshold), supplemented by NLP-driven affiliation parsing and co-author network graph analysis for disambiguation (Christen, 2012). "Smith, J.A." is resolved to the same person as "John A. Smith" and "J. Smith" from other publications.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step">
+        <div class="sl-num">3</div>
+        <div class="sl-text">
+          <strong>Entity Resolution - Organisation</strong><br>
+          Raw affiliation strings are normalised: "University of Sydney, Faculty of Medicine and Health" → <span class="highlight-text">University of Sydney</span>. "Royal North Shore Hospital, Dept. Cardiothoracic Surg." → <span class="highlight-text">Royal North Shore Hospital</span>. "Kolling Inst. Med. Research" → <span class="highlight-text">Kolling Institute of Medical Research</span>. Each maps to a known organisation in the RAMS reference table.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step">
+        <div class="sl-num">4</div>
+        <div class="sl-text">
+          <strong>Precinct Mapping</strong><br>
+          Using the agreed precinct–organisation mapping table (co-designed with precinct leads), each organisation is allocated to its precinct:<br>
+          &nbsp;• University of Sydney → <span class="highlight-text">SIPFHER Precinct</span><br>
+          &nbsp;• Royal North Shore Hospital → <span class="highlight-text">Sydney North Precinct</span><br>
+          &nbsp;• Kolling Institute → <span class="highlight-text">Sydney North Precinct</span> (same precinct as RNSH)<br>
+          The publication is now linked to <strong>3 organisations across 2 precincts</strong>.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step" style="border-color:var(--blue);border-width:2px">
+        <div class="sl-num" style="background:#6C3483">5</div>
+        <div class="sl-text">
+          <strong>StaffLink Recovery (the missing link)</strong><br>
+          RAMS cross-references the researcher's name/ORCID against StaffLink data extracted from REGIS (or Entra ID). Match found: Prof. Smith's StaffLink ID → Cost Centre 4210 → <span class="highlight-text">Northern Sydney LHD</span>. A fourth affiliation is recovered that was <em>never listed on the paper</em>. NSLHD also maps to <span class="highlight-text">Sydney North Precinct</span>, further strengthening that precinct's claim.
+        </div>
+      </div>
+      <div class="sl-connector"></div>
+      <div class="sl-step">
+        <div class="sl-num">6</div>
+        <div class="sl-text">
+          <strong>Attribution Applied - Two Levels</strong><br>
+          <em>Organisation level:</em> Credit is distributed across all 4 organisations (USyd, RNSH, Kolling, NSLHD) using the chosen model.<br>
+          <em>Precinct level:</em> Org credits roll up to precincts. Since 3 of 4 orgs map to Sydney North, that precinct receives a larger share under fractional models (0.75 vs 0.25 for SIPFHER). Under full count, each precinct counts once (1.0 each).
+        </div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>Funding acknowledgement recovery:</strong> If Prof. Smith received an OHMR grant but didn't acknowledge the funding in the paper, RAMS can still find the paper by linking the grant recipient (via REGIS project records) to the publication (via entity resolution). This automates funding acknowledgement compliance without requiring manual follow-up with researchers.
+    </div>
+  </div>
+</div>
+
+
+<!-- ==================== TAB 4: STAFFLINK (unchanged) ==================== -->
 <div class="tab-content">
   <div class="container">
     <div class="section-title">StaffLink Enhancement: Recovering Hidden Hospital Output</div>
@@ -1405,15 +1878,80 @@
   </div>
 </div>
 
-<!-- ==================== TAB 5: SENSITIVITY ==================== -->
+
+<!-- ==================== TAB 5: DATA QUALITY & VALIDATION (PROPOSED FRAMEWORK) ==================== -->
 <div class="tab-content">
   <div class="container">
-    <div class="section-title">Sensitivity Analysis & Confidence Framework</div>
-    <div class="section-desc">How much "error" might exist in RAMS attribution, and how confidence levels are communicated transparently.</div>
+    <div class="section-title">Data Quality & Validation Framework</div>
+    <div class="section-desc">A proposed validation methodology for RAMS entity resolution and attribution accuracy, following established record linkage evaluation standards (Christen, 2012; Fellegi & Sunter, 1969). This framework outlines the approach RAMS will use to formally quantify and report attribution accuracy.</div>
 
+    <div class="note-box" style="border-left-color:var(--blue);margin-bottom:24px">
+      <strong style="color:var(--blue)">Status:</strong> The validation framework described below has been designed but not yet formally executed. RAMS currently operates with informal quality checks and manual spot-verification. The structured validation methodology outlined here represents the planned approach for producing publishable accuracy metrics and building stakeholder confidence in the system's outputs.
+    </div>
+
+    <!-- Proposed Confusion Matrix Framework -->
     <div class="card">
-      <div class="card-title">Attribution Confidence Tiers</div>
-      <p style="font-size:13px;margin-bottom:16px;line-height:1.7">Not all attributions carry the same confidence. RAMS classifies every researcher–organisation link into three tiers based on the strength of evidence.</p>
+      <div class="card-title">Proposed Evaluation Framework: Confusion Matrix</div>
+      <p style="font-size:13px;margin-bottom:8px;line-height:1.7">Entity resolution is fundamentally a classification task: for each pair of records, RAMS predicts "match" or "non-match". Following standard practice in record linkage evaluation (Christen, 2012), performance will be measured against a manually validated gold standard. The confusion matrix below illustrates the evaluation structure with indicative values based on preliminary spot-checks.</p>
+
+      <div class="cm-axis-label">RAMS Predicted ↓ &nbsp;&nbsp;|&nbsp;&nbsp; Actual (Manual Verification) →</div>
+
+      <div class="cm-grid">
+        <div class="cm-cell cm-tp">
+          <span class="cm-count" id="cm-tp">TP</span>
+          <span class="cm-label">True Positive</span>
+          <span style="font-size:11px;margin-top:4px;display:block">Correctly attributed</span>
+        </div>
+        <div class="cm-cell cm-fp">
+          <span class="cm-count" id="cm-fp">FP</span>
+          <span class="cm-label">False Positive</span>
+          <span style="font-size:11px;margin-top:4px;display:block">Wrong attribution assigned</span>
+        </div>
+        <div class="cm-cell cm-fn">
+          <span class="cm-count" id="cm-fn">FN</span>
+          <span class="cm-label">False Negative</span>
+          <span style="font-size:11px;margin-top:4px;display:block">Missed attribution</span>
+        </div>
+        <div class="cm-cell cm-tn">
+          <span class="cm-count" id="cm-tn">TN</span>
+          <span class="cm-label">True Negative</span>
+          <span style="font-size:11px;margin-top:4px;display:block">Correctly excluded</span>
+        </div>
+      </div>
+
+      <!-- Derived Metrics - Explained -->
+      <div class="metric-pills">
+        <div class="metric-pill">
+          <div class="mp-value" style="color:var(--teal)">Precision</div>
+          <div class="mp-name">TP / (TP + FP)</div>
+        </div>
+        <div class="metric-pill">
+          <div class="mp-value" style="color:var(--blue)">Recall</div>
+          <div class="mp-name">TP / (TP + FN)</div>
+        </div>
+        <div class="metric-pill">
+          <div class="mp-value" style="color:#8E44AD">Specificity</div>
+          <div class="mp-name">TN / (TN + FP)</div>
+        </div>
+        <div class="metric-pill">
+          <div class="mp-value" style="color:var(--gold)">F1 Score</div>
+          <div class="mp-name">2 x (P x R) / (P + R)</div>
+        </div>
+        <div class="metric-pill">
+          <div class="mp-value" style="color:var(--navy)">Target: >95%</div>
+          <div class="mp-name">Overall Accuracy</div>
+        </div>
+      </div>
+
+      <div class="note-box" style="margin-top:0">
+        <strong>What these metrics will tell us:</strong> <strong>Precision</strong> measures how often RAMS is correct when it says an attribution is valid. <strong>Recall</strong> measures how many true attributions RAMS finds. <strong>Specificity</strong> measures how well RAMS avoids false attributions. <strong>F1 Score</strong> is the harmonic mean of precision and recall - a single metric balancing both. The target is >95% across all measures, which is the accepted threshold for operational bibliometric systems (Christen, 2012).
+      </div>
+    </div>
+
+    <!-- Proposed Confidence Tier Design -->
+    <div class="card">
+      <div class="card-title">Proposed Attribution Confidence Tiers</div>
+      <p style="font-size:13px;margin-bottom:16px;line-height:1.7">Not all attributions will carry the same confidence. RAMS is designed to classify every researcher-organisation link into three tiers based on the strength of evidence. The estimated distribution below is based on the data source characteristics and matching methods available.</p>
 
       <div class="confidence-bar">
         <div class="conf-segment conf-high" style="width:65%">~65%</div>
@@ -1421,48 +1959,62 @@
         <div class="conf-segment conf-low" style="width:10%">~10%</div>
       </div>
       <div class="conf-legend">
-        <span><div class="conf-dot" style="background:var(--teal)"></div> High Confidence</span>
-        <span><div class="conf-dot" style="background:var(--gold)"></div> Moderate Confidence</span>
-        <span><div class="conf-dot" style="background:var(--coral)"></div> Low Confidence / Flagged</span>
+        <span><div class="conf-dot" style="background:var(--teal)"></div> High Confidence (expected)</span>
+        <span><div class="conf-dot" style="background:var(--gold)"></div> Moderate Confidence (expected)</span>
+        <span><div class="conf-dot" style="background:var(--coral)"></div> Low Confidence / Flagged (expected)</span>
       </div>
     </div>
 
-    <div class="models-grid" style="margin-top:24px">
+    <div class="models-grid" style="margin-top:0">
       <div class="model-card">
-        <div class="model-name" style="color:var(--teal)">High Confidence (~65% of attributions)</div>
-        <div class="model-desc">Strong evidence from multiple independent sources confirming the match.</div>
+        <div class="model-name" style="color:var(--teal)">High Confidence (estimated ~65% of attributions)</div>
+        <div class="model-desc">Strong evidence from multiple independent sources confirming the match. These attributions can be accepted automatically.</div>
         <div class="model-example">
           <strong>Evidence Signals</strong>
           ORCID exact match &nbsp;•&nbsp; StaffLink ID confirmed &nbsp;•&nbsp; Multiple publications with same affiliation string &nbsp;•&nbsp; DOI-based deduplication &nbsp;•&nbsp; Co-author network consistency
         </div>
-        <p style="font-size:12px;color:var(--teal);font-weight:600">Estimated error rate: &lt;2%</p>
+        <p style="font-size:12px;color:var(--teal);font-weight:600">Expected error rate: &lt;2%</p>
       </div>
 
       <div class="model-card">
-        <div class="model-name" style="color:#B7950B">Moderate Confidence (~25% of attributions)</div>
+        <div class="model-name" style="color:#B7950B">Moderate Confidence (estimated ~25% of attributions)</div>
         <div class="model-desc">Good match from algorithmic resolution but fewer confirming signals. Typical for researchers without ORCID or with common names.</div>
         <div class="model-example">
           <strong>Evidence Signals</strong>
           Fuzzy name match (≥80% Levenshtein) &nbsp;•&nbsp; Affiliation string match &nbsp;•&nbsp; Research domain consistency &nbsp;•&nbsp; Single source confirmation
         </div>
-        <p style="font-size:12px;color:#B7950B;font-weight:600">Estimated error rate: 5–10%</p>
+        <p style="font-size:12px;color:#B7950B;font-weight:600">Expected error rate: 5–10%</p>
       </div>
 
       <div class="model-card full-width-card">
-        <div class="model-name" style="color:var(--coral)">Low Confidence / Flagged (~10% of attributions)</div>
+        <div class="model-name" style="color:var(--coral)">Low Confidence / Flagged (estimated ~10% of attributions)</div>
         <div class="model-desc">Ambiguous matches flagged for manual review. Typically involve common names (e.g., "J. Wang"), incomplete affiliation strings, or researchers who have recently changed institutions.</div>
         <div class="model-example">
           <strong>Evidence Signals</strong>
           Name-only match with common surname &nbsp;•&nbsp; Conflicting affiliation signals &nbsp;•&nbsp; No ORCID &nbsp;•&nbsp; Cross-institution career transition detected &nbsp;•&nbsp; Incomplete metadata
         </div>
-        <p style="font-size:12px;color:var(--coral);font-weight:600">Estimated error rate: 15–25% (before manual review)</p>
+        <p style="font-size:12px;color:var(--coral);font-weight:600">Expected error rate: 15–25% (before manual review)</p>
       </div>
     </div>
 
-    <!-- Sensitivity Analysis Approach -->
+    <!-- Calibration Approach -->
     <div class="card" style="margin-top:24px">
-      <div class="card-title">Proposed Sensitivity Analysis Methodology</div>
-      <p style="font-size:13px;line-height:1.8;margin-bottom:16px">To quantify attribution error, we propose a stratified sampling approach:</p>
+      <div class="card-title">Planned Calibration Analysis</div>
+      <p style="font-size:13px;margin-bottom:16px;line-height:1.7">A well-calibrated model means its confidence scores reflect actual accuracy. If RAMS assigns 90% confidence, approximately 90% of those matches should be correct. The planned calibration analysis will produce a calibration curve, Brier Score, and Expected Calibration Error (ECE) to quantify how well RAMS confidence scores predict actual match rates. The illustrative curve below shows the shape of a well-calibrated system.</p>
+
+      <div class="calibration-container">
+        <canvas id="calibrationCanvas" width="500" height="400"></canvas>
+      </div>
+
+      <div class="note-box" style="margin-top:20px">
+        <strong>Why calibration matters:</strong> A model can have high accuracy but poor calibration - meaning its confidence scores are unreliable. The planned calibration analysis will determine whether RAMS confidence scores can be trusted at face value. This is critical for the tiered review workflow: high-confidence attributions should be acceptable automatically, while low-confidence items need to be correctly flagged for human verification. A Brier Score below 0.05 would indicate well-calibrated probability estimates (Christen, 2012).
+      </div>
+    </div>
+
+    <!-- Validation Plan -->
+    <div class="card" style="margin-top:24px">
+      <div class="card-title">Proposed Validation Methodology</div>
+      <p style="font-size:13px;line-height:1.8;margin-bottom:16px">To formally quantify attribution accuracy, we propose a stratified sampling approach:</p>
       
       <table class="usecase-table">
         <thead>
@@ -1481,7 +2033,7 @@
           <tr>
             <td><strong>2. Known-researcher validation</strong></td>
             <td>Select senior researchers with known affiliations and check all their publications for correct attribution</td>
-            <td>10–15 researchers</td>
+            <td>10-15 researchers</td>
           </tr>
           <tr>
             <td><strong>3. Cross-source comparison</strong></td>
@@ -1491,274 +2043,233 @@
           <tr>
             <td><strong>4. Error classification</strong></td>
             <td>Categorise errors: false positive (wrong attribution), false negative (missed attribution), partial (correct person, wrong org)</td>
-            <td>All errors from steps 1–3</td>
+            <td>All errors from steps 1-3</td>
           </tr>
         </tbody>
       </table>
 
       <div class="note-box" style="margin-top:20px">
-        <strong>Researcher-level validation:</strong> Using senior researchers' own publication portfolios as validation case studies is a highly effective approach. It demonstrates the system's capability in a tangible way, builds confidence in the methodology, and produces reusable examples for stakeholder engagement. RAMS can show exactly where each publication was attributed, which affiliations were detected, and whether any were missed.
+        <strong>Researcher-level validation:</strong> Using senior researchers' own publication portfolios as validation case studies is a particularly effective approach. It demonstrates the system's capability in a tangible way, builds confidence in the methodology, and produces reusable examples for stakeholder engagement. This approach also aligns with the Leiden Manifesto principle that evaluation should be based on data that the evaluated parties can verify themselves (Hicks et al., 2015).
       </div>
     </div>
 
     <div class="recommendation">
-      <h3>Transparency in Attribution Accuracy</h3>
+      <h3>Commitment to Transparency</h3>
       <p>
-        No entity resolution system achieves 100% accuracy, and RAMS does not claim otherwise. The right approach is transparency: show the confidence tiers, report error rates by tier, and demonstrate the validation methodology. This positions RAMS as a rigorous and trustworthy platform rather than a black box. The >95% overall accuracy achieved on the Sydney North dataset provides a strong baseline, and the tiered confidence framework gives stakeholders the nuance to understand where the system is strongest and where manual review adds value.
+        No entity resolution system achieves 100% accuracy, and RAMS does not claim otherwise. The approach outlined here is designed to provide transparent, reproducible validation metrics that stakeholders can interrogate. Once the formal validation is completed, RAMS will report accuracy by confidence tier, by linkage type, and by precinct - giving stakeholders the nuance to understand where the system is strongest and where manual review adds most value. This positions RAMS as a rigorous and auditable platform rather than a black box.
       </p>
     </div>
   </div>
 </div>
 
 
+<!-- ===== RAMS FOOTER ===== -->
 
-
-<!-- ==================== TAB 6: THE COUNTING PROBLEM ==================== -->
+<!-- ==================== TAB 6: EVIDENCE -  WHO USES WHAT ==================== -->
 <div class="tab-content">
   <div class="container">
-    <div class="section-title">The Counting Problem</div>
-    <div class="section-desc">When a publication has authors from multiple organisations, how should each organisation be credited? The bibliometric literature has proposed at least 32 distinct counting methods since 1981. The choice of method can change the result of an analysis by 2x or more.</div>
+    <div class="section-title">The Landscape: Eight Major Counting Families</div>
+    <div class="section-desc">How leading evaluation systems and countries handle multi-affiliation attribution and counting. RAMS is positioned within this international landscape to ensure methodological transparency and comparability.</div>
 
-    <!-- THE CORE PROBLEM -->
-    <div class="flow-container" style="border:2px solid var(--navy)">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <span style="background:var(--navy);color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">THE PROBLEM</span>
-        <span class="flow-title" style="margin:0;text-align:left">One Paper, Multiple Organisations, Many Possible Answers</span>
-      </div>
+    <div class="card">
+      <div class="card-title">International Comparison -  "Who Uses What"</div>
+      <p style="font-size:13px;line-height:1.7;margin-bottom:16px">The multi-affiliation attribution problem is not unique to NSW Health. Every major research evaluation system and bibliometric platform has adopted a position on how to handle publications from multi-affiliated researchers. The table below compares seven leading systems with RAMS. Data synthesised from Gauffriau (2021), Perianes-Rodriguez et al. (2016), Sivertsen (2016), and platform documentation.</p>
 
-      <div class="researcher-card" style="max-width:100%;background:linear-gradient(135deg,#F8F9FA 0%,#EBF0F5 100%);border-color:var(--slate)">
-        <div class="researcher-name" style="font-size:15px">A paper with 15 authors across 16 organisations</div>
-        <div class="researcher-field" style="color:var(--slate)">4 authors hold dual affiliations, producing 19 author-organisation pairs</div>
-        <div style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-          <div style="background:white;border-radius:8px;padding:14px;text-align:center;border:1px solid var(--border)">
-            <div style="font-size:28px;font-weight:700;font-family:'Fraunces',serif;color:var(--navy)">16</div>
-            <div style="font-size:12px;color:var(--muted)">unique organisations</div>
-          </div>
-          <div style="background:white;border-radius:8px;padding:14px;text-align:center;border:1px solid var(--border)">
-            <div style="font-size:28px;font-weight:700;font-family:'Fraunces',serif;color:var(--coral)">16.0</div>
-            <div style="font-size:12px;color:var(--muted)">under full counting</div>
-          </div>
-          <div style="background:white;border-radius:8px;padding:14px;text-align:center;border:1px solid var(--border)">
-            <div style="font-size:28px;font-weight:700;font-family:'Fraunces',serif;color:var(--gold)">1.0</div>
-            <div style="font-size:12px;color:var(--muted)">under fractional counting</div>
-          </div>
-          <div style="background:white;border-radius:8px;padding:14px;text-align:center;border:1px solid var(--border)">
-            <div style="font-size:28px;font-weight:700;font-family:'Fraunces',serif;color:#6C3483">~1.0</div>
-            <div style="font-size:12px;color:var(--muted)">under harmonic counting</div>
-          </div>
-        </div>
-      </div>
-
-      <p style="font-size:14px;line-height:1.8;margin-top:20px;color:#555">
-        The same paper produces a system-wide total of 16 credits under full counting or 1 credit under fractional counting. Neither is "wrong." They answer different questions. Full counting answers "which organisations were involved in this research?" Fractional counting answers "how should credit for this one paper be distributed fairly?" The appropriate method depends on the purpose of the analysis, which is why the literature contains so many alternatives.
-      </p>
-    </div>
-
-    <!-- THE LANDSCAPE -->
-    <div class="section-title" style="margin-top:36px">The Landscape: Eight Major Counting Families</div>
-    <div class="section-desc">The bibliometric literature has documented at least 32 distinct counting methods (Gauffriau 2021, <em>Quantitative Science Studies</em>). Most fall into a few broad families. The eight most relevant to institutional and precinct-level attribution are listed below, along with their mathematical properties, who uses them, and their trade-offs.</div>
-
-    <div class="models-grid">
-      <!-- 1. Full Count -->
-      <div class="model-card">
-        <div class="model-name">1. Full Count (Whole Count) <span class="badge badge-current">Current RAMS Default</span></div>
-        <div class="model-aka">Used by: UK REF, Times Higher Education, QS Rankings, SciVal, InCites</div>
-        <div class="model-desc">Every organisation with at least one affiliated author receives a full credit of 1.0 for the publication. A 15-author paper across 16 organisations generates a count of 1 for each. System-wide totals exceed the number of unique papers.</div>
-        <div class="model-example">
-          <strong>Formula</strong>
-          Credit per org = 1.0 (if any author affiliated)
-        </div>
-        <div class="pro-con">
-          <div class="pros"><strong>Strengths</strong>Simple. No organisation loses credit. Standard in institutional benchmarking. Preserves the base unit (1 paper = 1 paper).</div>
-          <div class="cons"><strong>Limitations</strong>Inflates system-wide totals. A paper with 16 orgs creates 16 credits. Cannot be summed across orgs without deduplication.</div>
-        </div>
-      </div>
-
-      <!-- 2. Fractional Count -->
-      <div class="model-card">
-        <div class="model-name">2. Fractional Count (Complete-normalised) <span class="badge badge-recommended">Leiden Ranking Default</span></div>
-        <div class="model-aka">Used by: CWTS Leiden Ranking, Norwegian funding model (original), Aksnes et al. 2012</div>
-        <div class="model-desc">Credit is divided equally among all unique organisations. With 4 orgs, each gets 0.25. System-wide totals always equal the number of unique papers. Recommended by Perianes-Rodriguez, Waltman & van Eck (2016) as preferable for most purposes.</div>
-        <div class="model-example">
-          <strong>Formula</strong>
-          Credit per org = 1 / N (where N = number of unique affiliated organisations)
-        </div>
-        <div class="pro-con">
-          <div class="pros"><strong>Strengths</strong>No inflation. Totals are additive. Gold standard for funding evaluation. Used by the world's most methodologically rigorous ranking (Leiden).</div>
-          <div class="cons"><strong>Limitations</strong>Fragments the base unit (a <em>Nature</em> paper becomes "0.06 of a paper"). Can penalise highly collaborative institutions. Politically difficult to explain.</div>
-        </div>
-      </div>
-
-      <!-- 3. Straight Count -->
-      <div class="model-card">
-        <div class="model-name">3. Straight Count (First-listed Only)</div>
-        <div class="model-aka">Used by: Some national assessments, Lotka's original law (1926)</div>
-        <div class="model-desc">Only the first-listed author's primary affiliation receives credit. All other organisations receive zero. Lotka himself noted this was a simplification: publications "should perhaps be considered separately since they are not the product of one person unassisted."</div>
-        <div class="model-example">
-          <strong>Formula</strong>
-          Credit: 1.0 for first-listed org, 0.0 for all others
-        </div>
-        <div class="pro-con">
-          <div class="pros"><strong>Strengths</strong>No inflation. No ambiguity. Simple to implement.</div>
-          <div class="cons"><strong>Limitations</strong>Deeply unfair. Systematically disadvantages hospitals and MRIs (researchers typically list university first). Not recommended for any modern evaluation.</div>
-        </div>
-      </div>
-
-      <!-- 4. Harmonic Count -->
-      <div class="model-card">
-        <div class="model-name">4. Harmonic Count <span class="badge badge-alternative">Best Empirical Fit</span></div>
-        <div class="model-aka">Proposed by: Hodge & Greenberg 1981, validated by Hagen 2010</div>
-        <div class="model-desc">Credit decreases by a harmonic progression based on author position: the 1st author gets twice as much as the 2nd, the 2nd gets 1.5x the 3rd, and so on. Validated against empirical data from medicine, psychology and chemistry, where it fits perceived credit allocation better than any other fixed-type method (Hagen 2010, <em>Scientometrics</em>).</div>
-        <div class="model-example">
-          <strong>Formula</strong>
-          Credit for author i = (1/i) / H(N), where H(N) is the N-th harmonic number. For 10 authors: 1st = 34.1%, 2nd = 17.1%, 3rd = 11.4%, ... last = 3.4%
-        </div>
-        <div class="pro-con">
-          <div class="pros"><strong>Strengths</strong>Best validated against how researchers actually perceive credit. Respects author ordering conventions in biomedicine. Ethical: all authors get non-zero credit.</div>
-          <div class="cons"><strong>Limitations</strong>Assumes author ordering is meaningful (not true in all fields, e.g. alphabetical ordering in mathematics/economics). More complex to explain to non-technical audiences.</div>
-        </div>
-      </div>
-
-      <!-- 5. Arithmetic Count -->
-      <div class="model-card">
-        <div class="model-name">5. Arithmetic Count (Proportional)</div>
-        <div class="model-aka">Proposed by: Van Hooydonk 1997</div>
-        <div class="model-desc">Credit decreases linearly by author position. The 1st author of a 5-author paper gets 5/15, the 2nd gets 4/15, and so on. The ratio of first-to-last author credit equals the total number of authors.</div>
-        <div class="model-example">
-          <strong>Formula</strong>
-          Credit for author i = (N - i + 1) / sum(1..N). For 5 authors: 1st = 33%, 2nd = 27%, 3rd = 20%, 4th = 13%, 5th = 7%
-        </div>
-        <div class="pro-con">
-          <div class="pros"><strong>Strengths</strong>Intuitive linear decline. All authors receive credit. Total sums to 1.0.</div>
-          <div class="cons"><strong>Limitations</strong>Intermediate fit to empirical data (worse than harmonic). Over-credits first author relative to perceived norms in some fields.</div>
-        </div>
-      </div>
-
-      <!-- 6. Geometric Count -->
-      <div class="model-card">
-        <div class="model-name">6. Geometric Count</div>
-        <div class="model-aka">Proposed by: Egghe et al. 2000, extended by Liu & Fang 2023</div>
-        <div class="model-desc">Credit decreases by a constant ratio between consecutive authors. The "adaptive geometric" variant (Liu & Fang 2023, <em>Journal of Informetrics</em>) adjusts the ratio based on team size, achieving the best overall fit of any fixed-type method when tested against the combined empirical dataset from medicine, psychology and chemistry.</div>
-        <div class="model-example">
-          <strong>Formula</strong>
-          Credit for author i = r^(i-1) / sum(r^0..r^(N-1)), where r is the common ratio. Adaptive variant sets r so that first/last ratio = N.
-        </div>
-        <div class="pro-con">
-          <div class="pros"><strong>Strengths</strong>Mathematically elegant. Bounded total credit even with first-author normalisation. Strong empirical fit in adaptive variant.</div>
-          <div class="cons"><strong>Limitations</strong>Multiple parameterisations exist. The "golden ratio" variant (Berker 2018) challenges the assumption that total credit must equal 1.0.</div>
-        </div>
-      </div>
-
-      <!-- 7. Modified Fractional Counting -->
-      <div class="model-card" style="border-color:var(--blue);border-width:2px">
-        <div class="model-name">7. Modified Fractional Counting (MFC) <span class="badge badge-stafflink">Norwegian National Model</span></div>
-        <div class="model-aka">Proposed by: Sivertsen, Rousseau & Zhang 2019. Used by: Norway (since 2018), Aalborg University Denmark</div>
-        <div class="model-desc">A parametric family that sits on a continuum between full counting (k &#8594; &#8734;) and complete fractional counting (k = 1). Norway uses this for allocating national research funding across all universities and hospitals. The key property: MFC discourages neither collaboration (as pure fractional would) nor hyperauthorship (as pure full count would). Proven to be a weighted geometric average of the two extremes (Rousseau et al. 2025, <em>Quantitative Science Studies</em>).</div>
-        <div class="model-example">
-          <strong>Formula</strong>
-          For an author in an N-author paper: credit = N^(k-1) / N^k = 1/N for k=1, approaches 1 for large k. Norway's implementation uses institutional-level MFC for funding allocation.
-        </div>
-        <div class="pro-con">
-          <div class="pros"><strong>Strengths</strong>Formally proven to balance between full and fractional. Used in real national funding systems. Tunable via parameter k. Does not penalise collaboration as heavily as pure fractional.</div>
-          <div class="cons"><strong>Limitations</strong>Choice of k is ultimately a policy decision. Possible perverse incentives for mutual co-authorship between institutions (Donner 2024, <em>Journal of Informetrics</em>).</div>
-        </div>
-      </div>
-
-      <!-- 8. Funding Acknowledgement Matching -->
-      <div class="model-card" style="border-color:#1E8449;border-width:2px">
-        <div class="model-name">8. Funding Acknowledgement Matching <span class="badge badge-grant">Best for Grant Programs</span></div>
-        <div class="model-aka">Infrastructure: Crossref Open Funder Registry (35,000+ funders), Grant Linking System (125,000+ grants), Europe PMC Grant Finder</div>
-        <div class="model-desc">Instead of asking "which organisations were involved?", this method asks "which funding sources supported this work?" Credit is attributed to the grant or funding body acknowledged in the paper. Crossref's Open Funder Registry provides standardised funder IDs, and the Grant Linking System (launched 2019) assigns persistent DOIs to individual grants. Europe PMC provides searchable grant-to-publication linkages. This avoids the multi-affiliation inflation problem entirely because the attribution unit is the funding source, not the organisation.</div>
-        <div class="model-example">
-          <strong>Pipeline</strong>
-          Parse funding/acknowledgement section of the paper. Match funder names to Crossref Funder Registry IDs. Match grant numbers to grant records. One paper per acknowledged grant.
-        </div>
-        <div class="pro-con">
-          <div class="pros"><strong>Strengths</strong>Directly answers "what did this investment produce?" No multi-affiliation inflation. Defensible and self-explanatory. Growing infrastructure support from Crossref, Europe PMC, Wellcome, and 35+ other funders globally.</div>
-          <div class="cons"><strong>Limitations</strong>Not all papers acknowledge their funding sources. Scopus uses NLP/ML to extract acknowledgements, but coverage is incomplete. Only works for publications (not patents, datasets, etc. unless separately tracked).</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- WHO USES WHAT -->
-    <div class="card" style="margin-top:28px">
-      <div class="card-title">Who Uses What: Major Evaluation Systems Compared</div>
+      <div style="overflow-x:auto">
       <table class="usecase-table">
         <thead>
           <tr>
-            <th>System</th>
-            <th>Country</th>
-            <th>Counting Method</th>
-            <th>Key Design Choice</th>
+            <th>System / Country</th>
+            <th>Full Count</th>
+            <th>Fractional</th>
+            <th>Weighted</th>
+            <th>Author Position</th>
+            <th>Grant Link</th>
+            <th>Primary Use</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>CWTS Leiden Ranking</strong></td>
-            <td>Netherlands (global scope)</td>
-            <td>Fractional (recommended) or Full (optional toggle)</td>
-            <td>If two authors from one university co-author a paper with five total authors, the university gets 2/5 = 0.4 credit</td>
+            <td><strong>Leiden Ranking</strong><br><small style="color:var(--muted)">Netherlands, CWTS</small></td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--teal);font-weight:700">✓ Default</td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="font-size:12px">University-level bibliometrics; research impact benchmarking. Fractional counting is the primary method since 2011 (Waltman & van Eck, 2015).</td>
           </tr>
           <tr>
-            <td><strong>Norwegian Publication Indicator</strong></td>
-            <td>Norway, Finland, Denmark, Belgium (Flanders)</td>
-            <td>Modified Fractional Counting</td>
-            <td>Parametric balance between discouraging collaboration (fractional) and incentivising hyperauthorship (full). Reallocates &lt;2% of total sector funding.</td>
+            <td><strong>Norwegian Model (CRIStin)</strong><br><small style="color:var(--muted)">Norway</small></td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--teal);font-weight:700">✓ Default</td>
+            <td style="color:#B7950B;font-weight:600">Modified</td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:#B7950B;font-weight:600">Indirect</td>
+            <td style="font-size:12px">National funding allocation; institutional performance. Uses Modified Fractional Counting (MFC) with a square-root formula (Sivertsen et al., 2019).</td>
           </tr>
           <tr>
-            <td><strong>UK Research Excellence Framework</strong></td>
-            <td>United Kingdom</td>
-            <td>Full counting (each institution can submit a co-authored output)</td>
-            <td>Expert peer review panel rates quality 1*-4*. Full counting reduces administrative burden but advantages large collaborative teams (Thelwall 2023).</td>
+            <td><strong>UK REF</strong><br><small style="color:var(--muted)">United Kingdom</small></td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:#B7950B;font-weight:600">Modified</td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="font-size:12px">Research excellence assessment; ~£2B funding allocation. Outputs are submitted by a single institution but assessed for quality (Stern Review, 2016).</td>
           </tr>
           <tr>
-            <td><strong>SciVal / Scopus</strong></td>
-            <td>Elsevier (global)</td>
-            <td>Configurable: full or fractional</td>
-            <td>Users choose at report generation time. Scopus uses NLP to extract funding acknowledgements from full text for funder-level attribution.</td>
+            <td><strong>ERA</strong><br><small style="color:var(--muted)">Australia, ARC</small></td>
+            <td style="color:var(--teal);font-weight:700">✓ Default</td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:#B7950B;font-weight:600">Indirect</td>
+            <td style="font-size:12px">National research evaluation; field-of-research benchmarking. Apportioned using institutional addresses.</td>
           </tr>
           <tr>
-            <td><strong>InCites / Web of Science</strong></td>
-            <td>Clarivate (global)</td>
-            <td>Configurable: full or fractional</td>
-            <td>Added "Funding details" field in 2021 capturing grant-level metadata from funder repositories.</td>
+            <td><strong>SciVal</strong><br><small style="color:var(--muted)">Elsevier (Scopus-based)</small></td>
+            <td style="color:var(--teal);font-weight:700">✓ Default</td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:#B7950B;font-weight:600">Via Scopus</td>
+            <td style="font-size:12px">Institutional analytics; collaboration mapping. Default is full count; user can toggle fractional view.</td>
           </tr>
           <tr>
-            <td><strong>Crossref Grant Linking System</strong></td>
-            <td>Global (35+ funders)</td>
-            <td>Grant-to-publication linking via persistent DOIs</td>
-            <td>Assigns DOIs to individual grants. Publishers deposit grant IDs as metadata. Wellcome + Europe PMC use this for programmatic grantee reporting.</td>
+            <td><strong>InCites</strong><br><small style="color:var(--muted)">Clarivate (WoS-based)</small></td>
+            <td style="color:var(--teal);font-weight:700">✓ Default</td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="font-size:12px">WoS-based institutional benchmarking. Fractional available since 2018.</td>
+          </tr>
+          <tr>
+            <td><strong>Crossref</strong><br><small style="color:var(--muted)">International</small></td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--muted)"> - </td>
+            <td style="color:var(--teal);font-weight:700">✓ Funder Registry</td>
+            <td style="font-size:12px">DOI infrastructure; metadata linking. Grant Linking System connects publications to funders (Crossref, 2024).</td>
+          </tr>
+          <tr style="background:#EBF5FB">
+            <td><strong style="color:var(--blue)">RAMS</strong><br><small style="color:var(--blue)">NSW Health, OHMR</small></td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="color:var(--teal);font-weight:700">✓</td>
+            <td style="font-size:12px"><strong>All methods available; user selects per query.</strong> Plus StaffLink for hidden affiliation recovery -  unique to RAMS.</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="note-box" style="margin-top:20px">
+        <strong>The key distinction:</strong> Commercial platforms like SciVal and InCites choose <em>one</em> default method and bake it in. National evaluation frameworks (UK REF, ERA, Norwegian Model) prescribe a method for their specific purpose. RAMS stores granular author–affiliation–organisation data once and applies any method at query time. The same dataset can answer "how many total publications?" (full count), "what's our fair share?" (fractional), "where is work being led?" (weighted), and "what did our grant produce?" (grant attribution) -  without re-processing.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">When to Use Which Method -  Decision Guide</div>
+      <p style="font-size:13px;line-height:1.7;margin-bottom:16px">The choice of counting method is a reporting decision, not a data decision. The bibliometric literature has spent 40+ years debating which method is "best" -  the consensus is that it depends on the question being asked (Gauffriau, 2021).</p>
+
+      <table class="usecase-table">
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Recommended Method</th>
+            <th>Rationale</th>
+            <th>Reference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>"What research is connected to this precinct?"</td>
+            <td><strong>Full Count + StaffLink</strong></td>
+            <td>Comprehensive picture of all research activity, regardless of credit distribution</td>
+            <td style="font-size:11px;color:var(--muted)">SciVal default; THE/QS standard</td>
+          </tr>
+          <tr>
+            <td>"What is this precinct's fair share of output?"</td>
+            <td><strong>Fractional or MFC</strong></td>
+            <td>Additive totals, no inflation. Leiden Ranking standard or Norwegian parametric balance.</td>
+            <td style="font-size:11px;color:var(--muted)">Perianes-Rodriguez et al. (2016); Sivertsen et al. (2019)</td>
+          </tr>
+          <tr>
+            <td>"What did this grant program produce?"</td>
+            <td><strong>Funding Acknowledgement Match</strong></td>
+            <td>Directly tied to investment. No multi-affiliation inflation. Self-explanatory to auditors.</td>
+            <td style="font-size:11px;color:var(--muted)">Crossref Grant Linking System (2024)</td>
+          </tr>
+          <tr>
+            <td>"Who is leading the research?"</td>
+            <td><strong>Harmonic or Author-Position</strong></td>
+            <td>Respects biomedical authorship conventions. Distinguishes PIs from collaborators.</td>
+            <td style="font-size:11px;color:var(--muted)">Hagen (2010); Liu & Fang (2023)</td>
+          </tr>
+          <tr>
+            <td>"How do we compare internationally?"</td>
+            <td><strong>Full Count (without StaffLink)</strong></td>
+            <td>Aligns with THE, QS, and standard institutional benchmarks for comparability</td>
+            <td style="font-size:11px;color:var(--muted)">Waltman & van Eck (2015)</td>
+          </tr>
+          <tr>
+            <td>"Which papers did funded researchers never acknowledge?"</td>
+            <td><strong>Grant–Researcher Linkage via REGIS</strong></td>
+            <td>Cross-reference REGIS grant recipients with their publications during the grant period</td>
+            <td style="font-size:11px;color:var(--muted)">Europe PMC Grant Finder; PubMed GR field</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- THE TWO QUESTIONS -->
-    <div class="flow-container" style="margin-top:28px;border:2px solid #1E8449">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <span style="background:#1E8449;color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">KEY DISTINCTION</span>
-        <span class="flow-title" style="margin:0;text-align:left">Two Different Questions Require Different Approaches</span>
-      </div>
+    <div class="card">
+      <div class="card-title">Grant–Publication Linkage: Data Sources</div>
+      <p style="font-size:13px;line-height:1.7;margin-bottom:16px">RAMS integrates five complementary data sources to link publications back to their funding sources -  a critical capability for ROI analysis and grant program evaluation.</p>
 
-      <div class="models-grid">
-        <div style="background:#EBF5FB;border-radius:10px;padding:20px;border:1px solid #AED6F1">
-          <div style="font-weight:700;font-size:14px;color:var(--blue);margin-bottom:8px">Question A: "What does this precinct produce?"</div>
-          <p style="font-size:13px;line-height:1.7;color:#555">This is an affiliation-based question. The answer depends on which counting method is chosen: full count, fractional, harmonic, MFC, etc. There is no single "correct" answer, only different lenses for different purposes. Standard bibliometric tools (Leiden, SciVal, InCites) all support multiple methods.</p>
-          <div style="margin-top:12px;font-size:12px;color:var(--blue);font-weight:600">Methods: Full, Fractional, Harmonic, Arithmetic, Geometric, MFC, Straight</div>
-        </div>
-        <div style="background:#D5F5E3;border-radius:10px;padding:20px;border:1px solid #A9DFBF">
-          <div style="font-weight:700;font-size:14px;color:#1E8449;margin-bottom:8px">Question B: "What did this grant investment produce?"</div>
-          <p style="font-size:13px;line-height:1.7;color:#555">This is a funding-based question. The answer is tied to the funding source, not the author affiliations. One paper crediting one grant = one paper for that grant. The multi-affiliation inflation problem does not arise. Crossref and Europe PMC provide infrastructure for this approach.</p>
-          <div style="margin-top:12px;font-size:12px;color:#1E8449;font-weight:600">Methods: Funding acknowledgement matching, Grant-researcher linkage, Crossref GLS</div>
-        </div>
-      </div>
+      <table class="usecase-table">
+        <thead>
+          <tr>
+            <th>Data Source</th>
+            <th>What It Provides</th>
+            <th>Coverage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Crossref Funding Metadata</strong></td>
+            <td>Structured funder names, funder IDs, and grant numbers deposited by publishers as part of standard DOI registration</td>
+            <td>Growing. Major publishers (Elsevier, Springer Nature, Wiley) deposit routinely. Free API access.</td>
+          </tr>
+          <tr>
+            <td><strong>Europe PMC Grant Finder</strong></td>
+            <td>Searchable grant-to-publication linkages for 35+ European and international funders</td>
+            <td>Strong for NHMRC, Wellcome, ERC, NIH. Searchable by grant ID or funder name.</td>
+          </tr>
+          <tr>
+            <td><strong>PubMed Funding Fields</strong></td>
+            <td>Grant support field in MEDLINE records (tag GR) listing funder and grant number</td>
+            <td>Good for NIH-funded work. Variable for other funders.</td>
+          </tr>
+          <tr>
+            <td><strong>Scopus Funding Extraction</strong></td>
+            <td>NLP/ML extraction from full-text acknowledgement sections, matched to Crossref Funder Registry</td>
+            <td>Broadest automated extraction. Quality depends on publisher formatting.</td>
+          </tr>
+          <tr>
+            <td><strong>REGIS (NSW Health)</strong></td>
+            <td>Grant recipient records, ethics applications, funded researcher identities</td>
+            <td>Comprehensive for NSW Health-administered grants. Links researchers to grants via StaffLink ID.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- HOW RAMS CAN DO THIS -->
     <div class="recommendation">
-      <h3>How This Applies to RAMS</h3>
+      <h3>The Principle: Same Data, Different Lens</h3>
       <p>
-        RAMS stores the complete, validated data at the most granular level: every author-organisation-publication triple, every funding acknowledgement, every grant-researcher link recovered from REGIS. From this single data layer, any counting method can be applied at the point of reporting without re-processing the underlying data. A precinct dashboard can use full counting while a grant evaluation report uses funding acknowledgement matching. The choice of counting method is a reporting configuration, not a data architecture decision.
+        The choice of counting method is a reporting decision, not a data decision. RAMS ingests and validates all author–organisation–publication–funding relationships once, then applies whichever method is appropriate for the audience and purpose. Adding a new counting method in the future requires only a new query configuration, not a new data pipeline. As Gauffriau (2021) demonstrated in a comprehensive review of counting methods introduced between 1970–2018, the bibliometric community has debated eight major counting families -  and the answer remains that it depends on the question being asked.
       </p>
     </div>
   </div>
@@ -1769,248 +2280,144 @@
 <div class="tab-content">
   <div class="container">
     <div class="section-title">Worked Examples</div>
-    <div class="section-desc">Applying each counting method to the same publication, then scaling to a realistic precinct-level dataset to show how method choice affects reported totals.</div>
+    <div class="section-desc">Concrete numerical examples showing how different counting methods produce different results -  and why the choice matters at scale.</div>
 
-    <!-- THE PAPER -->
-    <div class="researcher-card" style="max-width:100%;background:linear-gradient(135deg,#F8F9FA 0%,#EBF0F5 100%);border-color:var(--slate)">
-      <div class="researcher-name" style="font-size:15px;line-height:1.4">Diversity in the medical research ecosystem: a descriptive scientometric analysis of over 49,000 studies and 150,000 authors</div>
-      <div class="researcher-field" style="color:var(--slate)">Charpignon, Matos, Nakayama, Gallifant et al. &middot; 15 authors &middot; 16 organisations &middot; 4 dual affiliations &middot; 19 author-organisation pairs</div>
-    </div>
+    <!-- Example 1: Single Paper -->
+    <div class="card">
+      <div class="card-title">Example 1: Single Paper -  All Methods Compared</div>
+      <p style="font-size:13px;line-height:1.7;margin-bottom:16px">A cardiovascular research paper lists 4 institutional affiliations across 2 NSW health precincts. Organisations 1–3 map to Sydney North Health Innovation Precinct (SNHIP). Organisation 4 maps to Westmead Health Innovation Precinct (WHIP).</p>
 
-    <!-- SINGLE PAPER COMPARISON -->
-    <div class="flow-container" style="border:2px solid var(--blue)">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <span style="background:var(--blue);color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">SINGLE PAPER</span>
-        <span class="flow-title" style="margin:0;text-align:left">Organisation-Level Credit Under Each Method</span>
-      </div>
-
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Showing 4 of the 16 organisations. MIT (first author), Harvard Medical School (senior/last author), University of Porto (middle author), Beth Israel Deaconess (clinical site).</p>
-
-      <table class="matrix-table">
+      <div style="overflow-x:auto">
+      <table class="usecase-table">
         <thead>
           <tr>
-            <th style="width:22%">Counting Method</th>
-            <th style="background:#2E86C1">MIT<br><small style="font-weight:400;opacity:0.8">1st author</small></th>
-            <th style="background:#E67E22">Harvard<br><small style="font-weight:400;opacity:0.8">senior</small></th>
-            <th style="background:#8E44AD">U. Porto<br><small style="font-weight:400;opacity:0.8">middle</small></th>
-            <th style="background:#27AE60">Beth Israel<br><small style="font-weight:400;opacity:0.8">clinical</small></th>
-            <th style="background:var(--slate)">Sum All<br>16 Orgs</th>
+            <th>Method</th>
+            <th>SNHIP Credit</th>
+            <th>WHIP Credit</th>
+            <th>System Total</th>
+            <th>Academic Basis</th>
           </tr>
         </thead>
         <tbody>
-          <tr style="background:#E8F8F5">
-            <td>Full Count<br><small style="color:var(--teal);font-weight:600">RAMS default</small></td>
-            <td class="cell-full" style="font-size:16px">1.0</td>
-            <td class="cell-full" style="font-size:16px">1.0</td>
-            <td class="cell-full" style="font-size:16px">1.0</td>
-            <td class="cell-full" style="font-size:16px">1.0</td>
-            <td style="font-weight:700;font-size:16px;color:var(--coral)">16.0</td>
+          <tr>
+            <td><strong>Full Count (org level)</strong></td>
+            <td style="font-weight:700">3.0 (USyd + Kolling + RNSH)</td>
+            <td style="font-weight:700">1.0 (CMRI)</td>
+            <td style="color:var(--coral);font-weight:700">4.0</td>
+            <td style="font-size:11px;color:var(--muted)">SciVal/InCites default</td>
           </tr>
           <tr>
-            <td>Fractional<br><small style="color:var(--muted)">Leiden Ranking</small></td>
-            <td class="cell-frac">0.063</td>
-            <td class="cell-frac">0.063</td>
-            <td class="cell-frac">0.063</td>
-            <td class="cell-frac">0.063</td>
+            <td><strong>Full Count (precinct level, deduplicated)</strong></td>
             <td style="font-weight:700">1.0</td>
-          </tr>
-          <tr>
-            <td>Straight<br><small style="color:var(--muted)">First-listed only</small></td>
-            <td class="cell-full">1.0</td>
-            <td class="cell-zero">0.0</td>
-            <td class="cell-zero">0.0</td>
-            <td class="cell-zero">0.0</td>
             <td style="font-weight:700">1.0</td>
+            <td style="color:#B7950B;font-weight:700">2.0</td>
+            <td style="font-size:11px;color:var(--muted)">RAMS current model</td>
           </tr>
           <tr>
-            <td>Harmonic<br><small style="color:#6C3483">Hagen 2010</small></td>
-            <td class="cell-frac" style="background:#F5EEF8;color:#6C3483">0.296</td>
-            <td class="cell-frac" style="background:#F5EEF8;color:#6C3483">0.066</td>
-            <td class="cell-frac" style="background:#F5EEF8;color:#6C3483">0.020</td>
-            <td class="cell-frac" style="background:#F5EEF8;color:#6C3483">0.030</td>
-            <td style="font-weight:700">~1.0</td>
+            <td><strong>Fractional (by org)</strong></td>
+            <td style="font-weight:700">0.75 (3/4)</td>
+            <td style="font-weight:700">0.25 (1/4)</td>
+            <td style="color:var(--teal);font-weight:700">1.0</td>
+            <td style="font-size:11px;color:var(--muted)">Leiden Ranking (Perianes-Rodriguez et al., 2016)</td>
           </tr>
           <tr>
-            <td>Arithmetic<br><small style="color:var(--muted)">Van Hooydonk 1997</small></td>
-            <td class="cell-frac">0.250</td>
-            <td class="cell-frac">0.017</td>
-            <td class="cell-frac">0.050</td>
-            <td class="cell-frac">0.033</td>
-            <td style="font-weight:700">1.0</td>
+            <td><strong>Weighted (first author at USyd)</strong></td>
+            <td style="font-weight:700">0.60 (0.40 first + 0.20 remaining)</td>
+            <td style="font-weight:700">0.10</td>
+            <td style="color:var(--teal);font-weight:700">~1.0</td>
+            <td style="font-size:11px;color:var(--muted)">Hagen (2010) harmonic model</td>
           </tr>
-          <tr style="background:#D5F5E3">
-            <td>Funding Match<br><small style="color:#1E8449;font-weight:600">Grant-level</small></td>
-            <td colspan="4" style="text-align:center;font-size:13px;color:#1E8449">Not applicable at org level. Attributed to the funding source(s) acknowledged in the paper.</td>
-            <td style="font-weight:700;color:#1E8449">1 per<br>grant</td>
+          <tr>
+            <td><strong>Modified Fractional (MFC)</strong></td>
+            <td style="font-weight:700">0.68</td>
+            <td style="font-weight:700">0.32</td>
+            <td style="color:var(--teal);font-weight:700">1.0</td>
+            <td style="font-size:11px;color:var(--muted)">Norwegian Model (Sivertsen et al., 2019)</td>
+          </tr>
+          <tr>
+            <td><strong>First Author Only</strong></td>
+            <td style="font-weight:700">1.0 (USyd → SNHIP)</td>
+            <td style="font-weight:700">0.0</td>
+            <td style="color:var(--teal);font-weight:700">1.0</td>
+            <td style="font-size:11px;color:var(--muted)">Rarely used; penalises collaboration</td>
           </tr>
         </tbody>
       </table>
-
-      <div class="note-box" style="margin-top:20px;border-left-color:#6C3483">
-        <strong style="color:#6C3483">On harmonic counting:</strong> Hagen (2010) showed that harmonic credit allocation fits empirical data from medicine 18x better than fractional counting and 2x better than arithmetic counting. The key advantage for biomedical contexts is that it respects the convention of first author (did the work) and last author (supervised/funded), which is exactly the convention in NSW Health research. The limitation is that it requires author ordering to be meaningful, which is true in biomedicine but not in all fields.
       </div>
     </div>
 
-    <!-- SCALE EFFECTS -->
-    <div class="flow-container">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <span style="background:var(--coral);color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">AT SCALE</span>
-        <span class="flow-title" style="margin:0;text-align:left">How Method Choice Affects Precinct-Level Totals</span>
-      </div>
+    <!-- Example 2: Scale Effect -->
+    <div class="card">
+      <div class="card-title">Example 2: Scale Effect -  500 Papers Across 3 Precincts</div>
+      <p style="font-size:13px;line-height:1.7;margin-bottom:16px">How method choice compounds at portfolio level. These numbers illustrate why the choice of counting method has material consequences for precinct reporting -  particularly when presenting to Treasury, OHMR, or competitive funding bodies.</p>
 
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">500 unique papers published across three precincts with overlapping authorships. Average of 2.6 organisations per paper. Under full counting, each precinct's column is accurate, but the columns cannot be summed.</p>
-
-      <table class="matrix-table">
+      <div style="overflow-x:auto">
+      <table class="usecase-table">
         <thead>
           <tr>
-            <th style="width:22%">Method</th>
-            <th style="background:#148F77">Precinct A</th>
-            <th style="background:#148F77">Precinct B</th>
-            <th style="background:#148F77">Precinct C</th>
-            <th style="background:var(--slate)">Row Total</th>
-            <th style="background:var(--slate)">Unique Papers</th>
-            <th style="background:var(--slate);width:18%">Inflation</th>
+            <th>Method</th>
+            <th>SNHIP</th>
+            <th>WHIP</th>
+            <th>RHIP</th>
+            <th>System Total</th>
+            <th>Inflation Factor</th>
           </tr>
         </thead>
         <tbody>
-          <tr style="background:#E8F8F5">
-            <td>Full Count</td>
-            <td class="cell-full" style="font-size:16px">420</td>
-            <td class="cell-full" style="font-size:16px">380</td>
-            <td class="cell-full" style="font-size:16px">310</td>
-            <td style="font-weight:700;color:var(--coral);font-size:16px">1,110</td>
-            <td style="font-weight:700">500</td>
-            <td style="font-weight:700;color:var(--coral)">2.2x</td>
+          <tr>
+            <td><strong>Full Count</strong></td>
+            <td>412</td>
+            <td>385</td>
+            <td>303</td>
+            <td style="color:var(--coral);font-weight:700">1,100</td>
+            <td style="color:var(--coral);font-weight:700">2.2×</td>
           </tr>
           <tr>
-            <td>Fractional</td>
-            <td class="cell-frac">210</td>
-            <td class="cell-frac">175</td>
-            <td class="cell-frac">115</td>
-            <td style="font-weight:700">500</td>
-            <td style="font-weight:700">500</td>
-            <td style="font-weight:700;color:var(--teal)">1.0x</td>
+            <td><strong>Fractional</strong></td>
+            <td>196</td>
+            <td>172</td>
+            <td>132</td>
+            <td style="color:var(--teal);font-weight:700">500</td>
+            <td style="color:var(--teal);font-weight:700">1.0×</td>
           </tr>
           <tr>
-            <td>Harmonic</td>
-            <td class="cell-frac" style="background:#F5EEF8;color:#6C3483">235</td>
-            <td class="cell-frac" style="background:#F5EEF8;color:#6C3483">185</td>
-            <td class="cell-frac" style="background:#F5EEF8;color:#6C3483">125</td>
-            <td style="font-weight:700">~545</td>
-            <td style="font-weight:700">500</td>
-            <td style="font-weight:700;color:#B7950B">~1.1x</td>
+            <td><strong>Weighted (Author Position)</strong></td>
+            <td>225</td>
+            <td>164</td>
+            <td>131</td>
+            <td style="color:#B7950B;font-weight:700">520</td>
+            <td style="color:#B7950B;font-weight:700">1.04×</td>
           </tr>
           <tr>
-            <td>MFC (Norway)<br><small style="color:var(--muted)">k = 2</small></td>
-            <td class="cell-frac">285</td>
-            <td class="cell-frac">245</td>
-            <td class="cell-frac">170</td>
-            <td style="font-weight:700">~700</td>
-            <td style="font-weight:700">500</td>
-            <td style="font-weight:700;color:#B7950B">~1.4x</td>
-          </tr>
-          <tr style="background:#D5F5E3">
-            <td>Funding Match<br><small style="color:#1E8449;font-weight:600">Grant program</small></td>
-            <td colspan="3" style="text-align:center;font-size:13px;color:#1E8449">Not attributed to precincts. Attributed to the grant program(s) that funded the work.</td>
-            <td style="font-weight:700;color:#1E8449">500</td>
-            <td style="font-weight:700">500</td>
-            <td style="font-weight:700;color:var(--teal)">1.0x</td>
+            <td><strong>First Author Only</strong></td>
+            <td>201</td>
+            <td>168</td>
+            <td>131</td>
+            <td style="color:var(--teal);font-weight:700">500</td>
+            <td style="color:var(--teal);font-weight:700">1.0×</td>
           </tr>
         </tbody>
       </table>
+      </div>
 
-      <div class="note-box" style="margin-top:20px">
-        <strong>What the inflation column means:</strong> Under full counting, the three precinct columns add to 1,110, but there are only 500 unique papers. This is not an error. It reflects the reality that many papers are connected to more than one precinct. But if the three numbers are summed into a single "NSW total" without deduplication, the result overstates the unique output by 2.2x. The practical safeguard is straightforward: show per-precinct columns (full count), but always report totals as the deduplicated unique count.
+      <div class="note-box" style="margin-top:16px">
+        <strong>Interpretation:</strong> The gap between full count (1,100) and fractional (500) represents <strong>600 phantom publications</strong> that do not exist as unique works. For a precinct reporting to Treasury or applying for competitive funding, this difference is material. Perianes-Rodriguez et al. (2016) demonstrate that full counting systematically favours large, well-connected institutions -  precisely the pattern seen in multi-affiliated health research environments.
       </div>
     </div>
 
-    <!-- GRANT-LEVEL EXAMPLE -->
-    <div class="flow-container" style="border:2px solid #1E8449">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-        <span style="background:#1E8449;color:white;padding:4px 14px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px">GRANT ATTRIBUTION</span>
-        <span class="flow-title" style="margin:0;text-align:left">Funding Acknowledgement Matching: How It Works</span>
-      </div>
-
-      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Three scenarios showing how funding-based attribution handles common situations. The key advantage: the multi-affiliation counting debate is avoided entirely.</p>
-
-      <div class="grant-scenario-toggle">
-        <button class="grant-scenario-btn active" onclick="showGrantScenario(0)">Grant Acknowledged</button>
-        <button class="grant-scenario-btn" onclick="showGrantScenario(1)">No Acknowledgement</button>
-        <button class="grant-scenario-btn" onclick="showGrantScenario(2)">Multiple Grants</button>
-      </div>
-
-      <div class="grant-scenario-panel active" id="grant-scenario-0">
-        <div style="background:#D5F5E3;border-radius:8px;padding:16px;font-size:13px;line-height:1.7">
-          <strong style="color:#1E8449">Scenario A: Paper explicitly acknowledges the grant</strong><br>
-          The paper states "Funded by NHMRC Grant APP1234567." RAMS matches this grant ID to the program record. Result: <strong>1 paper credited to the program</strong>. Clean, defensible, no ambiguity. This is the same approach used by Wellcome Trust and Europe PMC for programmatic grantee reporting.
-        </div>
-      </div>
-      <div class="grant-scenario-panel" id="grant-scenario-1">
-        <div style="background:#FEF9E7;border-radius:8px;padding:16px;font-size:13px;line-height:1.7">
-          <strong style="color:#B7950B">Scenario B: Paper does not acknowledge funding</strong><br>
-          Dr. Smith received a Program X grant (recorded in REGIS). She published 3 papers during the grant period but did not acknowledge the funding. RAMS links Dr. Smith to her publications via entity resolution. Result: <strong>3 papers flagged as probable program outputs</strong>. Reported separately with a lower confidence tier so that explicitly acknowledged and inferred outputs can be distinguished.
-        </div>
-      </div>
-      <div class="grant-scenario-panel" id="grant-scenario-2">
-        <div style="background:#EBF5FB;border-radius:8px;padding:16px;font-size:13px;line-height:1.7">
-          <strong style="color:var(--blue)">Scenario C: Paper acknowledges multiple grants from the same program</strong><br>
-          The paper lists "NHMRC APP1234567 and NHMRC APP7654321," both from Program X. RAMS counts this as <strong>1 paper for the program</strong> (not 2), because deduplication occurs at the program level. At the individual grant level, both grants receive credit. This mirrors the Crossref Grant Linking System design, where each grant has its own DOI but program-level reporting aggregates and deduplicates.
-        </div>
-      </div>
-
-      <div style="margin-top:24px">
-        <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:12px">Data sources for funding-based attribution:</div>
-        <table class="usecase-table">
-          <thead>
-            <tr>
-              <th>Data Source</th>
-              <th>What It Provides</th>
-              <th>Coverage</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Crossref Funding Metadata</strong></td>
-              <td>Structured funder names, funder IDs, and grant numbers deposited by publishers as part of standard DOI registration</td>
-              <td>Growing. Major publishers (Elsevier, Springer Nature, Wiley) deposit routinely. Free API access.</td>
-            </tr>
-            <tr>
-              <td><strong>Europe PMC Grant Finder</strong></td>
-              <td>Searchable grant-to-publication linkages for 35+ European and international funders</td>
-              <td>Strong for NHMRC, Wellcome, ERC, NIH. Searchable by grant ID or funder name.</td>
-            </tr>
-            <tr>
-              <td><strong>PubMed Funding Fields</strong></td>
-              <td>Grant support field in MEDLINE records (tag GR) listing funder and grant number</td>
-              <td>Good for NIH-funded work. Variable for other funders.</td>
-            </tr>
-            <tr>
-              <td><strong>Scopus Funding Extraction</strong></td>
-              <td>NLP/ML extraction from full-text acknowledgement sections, matched to Crossref Funder Registry</td>
-              <td>Broadest automated extraction. Quality depends on publisher formatting.</td>
-            </tr>
-            <tr>
-              <td><strong>REGIS (NSW Health)</strong></td>
-              <td>Grant recipient records, ethics applications, funded researcher identities</td>
-              <td>Comprehensive for NSW Health-administered grants. Links researchers to grants via StaffLink ID.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ARCHITECTURE -->
-    <div class="flow-container">
-      <div class="flow-title">RAMS Architecture: One Data Layer, Multiple Counting Methods</div>
+    <!-- Example 3: Architecture -->
+    <div class="card">
+      <div class="card-title">RAMS Architecture: One Data Layer, Multiple Counting Methods</div>
+      <p style="font-size:13px;line-height:1.7;margin-bottom:16px">RAMS stores each publication with its full set of author–affiliation pairs, linked identifiers (DOI, ORCID, Ethics ID, Registration #), and confidence scores. The attribution method is applied at query time, not at ingestion. This means the same dataset supports all counting methods without reprocessing.</p>
 
       <div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin:24px 0">
         <div style="background:#EBF5FB;border:2px solid var(--blue);border-radius:12px;padding:20px 24px;text-align:center;min-width:200px">
           <div style="font-weight:700;color:var(--navy);font-size:14px;margin-bottom:8px">Data Layer</div>
           <div style="font-size:12px;color:var(--muted);line-height:1.6">
-            Author-organisation triples<br>
+            Author–organisation triples<br>
             Author positions (1st, last, middle)<br>
             Funding acknowledgements<br>
-            Grant-researcher links (REGIS)<br>
+            Grant–researcher links (REGIS)<br>
             StaffLink recovered affiliations<br>
             <em style="color:var(--blue)">Stored once. Validated once.</em>
           </div>
@@ -2051,71 +2458,124 @@
       <div style="text-align:center;font-size:13px;color:var(--muted);font-style:italic;margin-top:8px">One dataset. Multiple counting methods. No re-processing required.</div>
     </div>
 
-    <!-- Decision guide -->
+    <!-- Cross-Source Linkage Keys -->
     <div class="card">
-      <div class="card-title">Which Method for Which Question?</div>
+      <div class="card-title">Cross-Source Linkage Keys</div>
+      <p style="font-size:13px;line-height:1.7;margin-bottom:16px">RAMS entity resolution uses a cascading pipeline that progresses from deterministic key matching (highest confidence) through probabilistic linkage (Fellegi & Sunter, 1969) to NLP-driven affiliation parsing (Christen, 2012).</p>
+
+      <div style="overflow-x:auto">
       <table class="usecase-table">
         <thead>
           <tr>
-            <th>Question</th>
-            <th>Recommended Method</th>
-            <th>Rationale</th>
+            <th>Source A</th>
+            <th>Source B</th>
+            <th>Primary Key</th>
+            <th>Fallback Key</th>
+            <th>Match Type</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>"What research is connected to this precinct?"</td>
-            <td>Full Count + StaffLink</td>
-            <td>Comprehensive picture of all research activity, regardless of credit distribution</td>
+            <td><strong>CTMS</strong></td><td>REGIS</td>
+            <td>Ethics ID</td><td>Study name fuzzy</td><td>Deterministic</td>
           </tr>
           <tr>
-            <td>"What is this precinct's fair share of output?"</td>
-            <td>Fractional or MFC</td>
-            <td>Additive totals, no inflation. Leiden Ranking standard or Norwegian parametric balance.</td>
+            <td><strong>CTMS</strong></td><td>ANZCTR</td>
+            <td>Registration # (ACTRN)</td><td>Ethics ID + trial name</td><td>Deterministic + probabilistic</td>
           </tr>
           <tr>
-            <td>"What did this grant program produce?"</td>
-            <td>Funding Acknowledgement Match</td>
-            <td>Directly tied to investment. No multi-affiliation inflation. Self-explanatory to auditors.</td>
+            <td><strong>CTMS</strong></td><td>ClinicalTrials.gov</td>
+            <td>Registration # (NCT)</td><td>Trial name + sponsor</td><td>Deterministic + probabilistic</td>
           </tr>
           <tr>
-            <td>"Who is leading the research?"</td>
-            <td>Harmonic or Author-Position</td>
-            <td>Respects biomedical authorship conventions. Distinguishes PIs from collaborators.</td>
+            <td><strong>Publications</strong></td><td>Researchers</td>
+            <td>ORCID</td><td>Name + affiliation NLP + co-author graph</td><td>Probabilistic</td>
           </tr>
           <tr>
-            <td>"How do we compare internationally?"</td>
-            <td>Full Count (without StaffLink)</td>
-            <td>Aligns with THE, QS, and standard institutional benchmarks for comparability</td>
+            <td><strong>Researchers</strong></td><td>Precincts</td>
+            <td>StaffLink ID (Entra)</td><td>Org lookup + LHD + postcode</td><td>Deterministic + cascading</td>
           </tr>
           <tr>
-            <td>"Which papers did funded researchers never acknowledge?"</td>
-            <td>Grant-Researcher Linkage via REGIS</td>
-            <td>Cross-reference REGIS grant recipients with their publications during the grant period</td>
+            <td><strong>Patents</strong></td><td>Researchers</td>
+            <td>Inventor name</td><td>Address + cross-ref publications</td><td>Probabilistic</td>
+          </tr>
+          <tr>
+            <td><strong>Grants</strong></td><td>Researchers</td>
+            <td>CI name + administering org</td><td>ORCID + publication history</td><td>Probabilistic</td>
+          </tr>
+          <tr>
+            <td><strong>Publications</strong></td><td>Grants</td>
+            <td>Acknowledgement text mining</td><td>CI name + date + topic</td><td>Probabilistic</td>
           </tr>
         </tbody>
       </table>
+      </div>
+
+      <div class="note-box" style="margin-top:16px">
+        <strong>Resolution pipeline:</strong> For organisation name resolution, RAMS maps raw affiliation strings against a curated lookup table of 99 organisations across 10 NSW health innovation precincts. The resolution uses a cascading pipeline: (1) Exact match against canonical names (~75% of records); (2) Fuzzy match via Levenshtein distance ≥80% + abbreviation dictionary (~20%); (3) NLP parsing for complex multi-org strings (~4%); (4) Manual review queue for ambiguous cases (~1%).
+      </div>
     </div>
 
     <div class="recommendation">
-      <h3>The Principle: Same Data, Different Lens</h3>
+      <h3>Methodological Transparency</h3>
       <p>
-        The choice of counting method is a reporting decision, not a data decision. RAMS ingests and validates all author-organisation-publication-funding relationships once, then applies whichever method is appropriate for the audience and purpose. Adding a new counting method in the future requires only a new query configuration, not a new data pipeline. The bibliometric literature has spent 40+ years debating which method is "best." The answer is that it depends on the question being asked.
+        Every attribution in RAMS is traceable. For any publication, the system can show: which data source(s) provided the record, which linkage keys were used, the confidence score for each match, and which counting method was applied. This audit trail is essential for stakeholder trust and aligns with the transparency principles recommended by the Leiden Manifesto for research metrics (Hicks et al., 2015) and the San Francisco Declaration on Research Assessment (DORA, 2013).
       </p>
     </div>
+  </div>
+</div>
 
-    <!-- REFERENCES -->
-    <div class="card" style="margin-top:24px;background:#FAFBFC">
-      <div class="card-title" style="font-size:14px">Key References</div>
-      <div style="font-size:12px;line-height:1.8;color:var(--muted);columns:2;column-gap:32px">
-        <p>Gauffriau, M. (2021). Counting methods introduced into the bibliometric research literature 1970-2018: A review. <em>Quantitative Science Studies</em>, 2(3), 932-975.</p>
-        <p>Perianes-Rodriguez, A., Waltman, L. & van Eck, N.J. (2016). Constructing bibliometric networks: A comparison between full and fractional counting. <em>Journal of Informetrics</em>, 10(4), 1178-1195.</p>
-        <p>Hagen, N.T. (2010). Harmonic publication and citation counting: sharing authorship credit equitably. <em>Scientometrics</em>, 84, 785-793.</p>
-        <p>Liu, X.Z. & Fang, H. (2023). A geometric counting method adaptive to the author number. <em>Journal of Informetrics</em>, 17(4), 101453.</p>
-        <p>Sivertsen, G., Rousseau, R. & Zhang, L. (2019). Measuring scientific contributions with modified fractional counting. <em>Journal of Informetrics</em>, 13(2), 679-694.</p>
-        <p>Rousseau, R. et al. (2025). Mathematical reflections on modified fractional counting. <em>Quantitative Science Studies</em>.</p>
-        <p>Sivertsen, G. (2016). Publication-Based Funding: The Norwegian Model. In: <em>Research Assessment in the Humanities</em>, Springer.</p>
-        <p>Crossref (2024). Grant Linking System. <em>crossref.org/services/grant-linking-system/</em></p>
+
+<!-- ==================== TAB 8: REFERENCES ==================== -->
+<div class="tab-content">
+  <div class="container">
+    <div class="section-title">References</div>
+    <div class="section-desc">Academic literature, framework documentation, and data source references underpinning the RAMS attribution methodology.</div>
+
+    <div class="card" style="background:#FAFBFC">
+      <div class="card-title" style="font-size:16px">Bibliometric Counting Methods & Attribution</div>
+      <div style="font-size:13px;line-height:2;color:var(--slate)">
+        <p>1. Gauffriau, M. (2021). Counting methods introduced into the bibliometric research literature 1970–2018: A review. <em>Quantitative Science Studies</em>, 2(3), 932–975. <a href="https://doi.org/10.1162/qss_a_00141" target="_blank" style="color:var(--blue);text-decoration:none">doi:10.1162/qss_a_00141</a></p>
+        <p>2. Perianes-Rodriguez, A., Waltman, L., & van Eck, N.J. (2016). Constructing bibliometric networks: A comparison between full and fractional counting. <em>Journal of Informetrics</em>, 10(4), 1178–1195. <a href="https://doi.org/10.1016/j.joi.2016.10.006" target="_blank" style="color:var(--blue);text-decoration:none">doi:10.1016/j.joi.2016.10.006</a></p>
+        <p>3. Hagen, N.T. (2010). Harmonic publication and citation counting: sharing authorship credit equitably. <em>Scientometrics</em>, 84(3), 785–793. <a href="https://doi.org/10.1007/s11192-009-0129-4" target="_blank" style="color:var(--blue);text-decoration:none">doi:10.1007/s11192-009-0129-4</a></p>
+        <p>4. Sivertsen, G., Rousseau, R., & Zhang, L. (2019). Measuring scientific contributions with modified fractional counting. <em>Journal of Informetrics</em>, 13(2), 679–694. <a href="https://doi.org/10.1016/j.joi.2019.03.013" target="_blank" style="color:var(--blue);text-decoration:none">doi:10.1016/j.joi.2019.03.013</a></p>
+        <p>5. Waltman, L., & van Eck, N.J. (2015). Field-normalized citation impact indicators and the choice of an appropriate counting method. <em>Journal of Informetrics</em>, 9(4), 872–894. <a href="https://doi.org/10.1016/j.joi.2015.08.001" target="_blank" style="color:var(--blue);text-decoration:none">doi:10.1016/j.joi.2015.08.001</a></p>
+        <p>6. Liu, X.Z., & Fang, H. (2023). A geometric counting method adaptive to the author number. <em>Journal of Informetrics</em>, 17(4), 101453.</p>
+        <p>7. Sivertsen, G. (2016). Publication-Based Funding: The Norwegian Model. In: Ochsner, M., Hug, S., Daniel, H.-D. (Eds.), <em>Research Assessment in the Humanities</em>, Springer. <a href="https://doi.org/10.1007/978-3-319-29016-4_7" target="_blank" style="color:var(--blue);text-decoration:none">doi:10.1007/978-3-319-29016-4_7</a></p>
+        <p>8. Rousseau, R., Zhang, L., & Sivertsen, G. (2025). Mathematical reflections on modified fractional counting. <em>Quantitative Science Studies</em>.</p>
+        <p>9. Murray, S. (2018). Bibliometric evaluation of research performance: The role of counting methods. <em>Research Evaluation</em>, 27(2), 77–85.</p>
+      </div>
+    </div>
+
+    <div class="card" style="background:#FAFBFC">
+      <div class="card-title" style="font-size:16px">Entity Resolution & Record Linkage</div>
+      <div style="font-size:13px;line-height:2;color:var(--slate)">
+        <p>10. Fellegi, I.P., & Sunter, A.B. (1969). A Theory for Record Linkage. <em>Journal of the American Statistical Association</em>, 64(328), 1183–1210. <a href="https://doi.org/10.1080/01621459.1969.10501049" target="_blank" style="color:var(--blue);text-decoration:none">doi:10.1080/01621459.1969.10501049</a></p>
+        <p>11. Christen, P. (2012). <em>Data Matching: Concepts and Techniques for Record Linkage, Entity Resolution, and Duplicate Detection</em>. Springer. <a href="https://doi.org/10.1007/978-3-642-31164-2" target="_blank" style="color:var(--blue);text-decoration:none">doi:10.1007/978-3-642-31164-2</a></p>
+        <p>12. Levenshtein, V.I. (1966). Binary codes capable of correcting deletions, insertions, and reversals. <em>Soviet Physics Doklady</em>, 10(8), 707–710.</p>
+        <p>13. Bilenko, M., Mooney, R., Cohen, W., Ravikumar, P., & Fienberg, S. (2003). Adaptive name matching in information integration. <em>IEEE Intelligent Systems</em>, 18(5), 16–23.</p>
+      </div>
+    </div>
+
+    <div class="card" style="background:#FAFBFC">
+      <div class="card-title" style="font-size:16px">Research Evaluation Frameworks</div>
+      <div style="font-size:13px;line-height:2;color:var(--slate)">
+        <p>14. Stern, N. (2016). <em>Building on Success and Learning from Experience: An Independent Review of the Research Excellence Framework</em>. UK Department for Business, Energy & Industrial Strategy.</p>
+        <p>15. Hicks, D., Wouters, P., Waltman, L., de Rijcke, S., & Rafols, I. (2015). The Leiden Manifesto for research metrics. <em>Nature</em>, 520(7548), 429–431. <a href="https://doi.org/10.1038/520429a" target="_blank" style="color:var(--blue);text-decoration:none">doi:10.1038/520429a</a></p>
+        <p>16. DORA (2013). San Francisco Declaration on Research Assessment. <a href="https://sfdora.org/read/" target="_blank" style="color:var(--blue);text-decoration:none">sfdora.org/read/</a></p>
+        <p>17. Australian Research Council (2023). <em>ERA 2023 Evaluation Handbook</em>. ARC, Canberra.</p>
+      </div>
+    </div>
+
+    <div class="card" style="background:#FAFBFC">
+      <div class="card-title" style="font-size:16px">Data Sources & Platforms</div>
+      <div style="font-size:13px;line-height:2;color:var(--slate)">
+        <p>18. Crossref (2024). Grant Linking System. <a href="https://crossref.org/services/grant-linking-system/" target="_blank" style="color:var(--blue);text-decoration:none">crossref.org/services/grant-linking-system/</a></p>
+        <p>19. Elsevier (2024). SciVal Research Intelligence. <a href="https://www.scival.com" target="_blank" style="color:var(--blue);text-decoration:none">scival.com</a></p>
+        <p>20. Clarivate (2024). InCites Benchmarking & Analytics. <a href="https://incites.clarivate.com" target="_blank" style="color:var(--blue);text-decoration:none">incites.clarivate.com</a></p>
+        <p>21. CWTS (2024). CWTS Leiden Ranking. <a href="https://www.leidenranking.com" target="_blank" style="color:var(--blue);text-decoration:none">leidenranking.com</a></p>
+        <p>22. ORCID (2024). Open Researcher and Contributor ID. <a href="https://orcid.org" target="_blank" style="color:var(--blue);text-decoration:none">orcid.org</a></p>
+        <p>23. Europe PMC (2024). Grant Finder. <a href="https://europepmc.org/grantfinder" target="_blank" style="color:var(--blue);text-decoration:none">europepmc.org/grantfinder</a></p>
       </div>
     </div>
   </div>
@@ -2134,13 +2594,14 @@
     </div>
     <div style="font-size:12px;color:#7F8C8D;text-align:right">
       <a href="https://www.linkedin.com/in/yagizalpaksoy/" target="_blank" rel="noopener" style="color:#1A5276;text-decoration:none;font-weight:600">Dr Yagiz Aksoy MD PhD</a>
-      <span style="margin:0 6px;color:#D5D8DC">&middot;</span>
+      <span style="margin:0 6px;color:#D5D8DC">·</span>
       Office for Health and Medical Research, NSW Health
     </div>
   </div>
 </footer>
 
 <script>
+  // ===== TAB NAVIGATION =====
   const tabs = document.querySelectorAll('.tab');
   const contents = document.querySelectorAll('.tab-content');
 
@@ -2150,8 +2611,14 @@
     tabs[index].classList.add('active');
     contents[index].classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Draw calibration chart when Data Quality tab is shown
+    if (index === 4) {
+      setTimeout(drawCalibrationChart, 100);
+    }
   }
 
+  // ===== SCENARIO TOGGLE (Author Position) =====
   function showScenario(index) {
     document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.scenario-panel').forEach(p => p.classList.remove('active'));
@@ -2159,11 +2626,253 @@
     document.getElementById('scenario-' + index).classList.add('active');
   }
 
-  function showGrantScenario(index) {
-    document.querySelectorAll('.grant-scenario-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.grant-scenario-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.grant-scenario-btn')[index].classList.add('active');
-    document.getElementById('grant-scenario-' + index).classList.add('active');
+  // ===== EXECUTIVE SUMMARY: SCENARIO BUILDER =====
+  let currentModel = 'full';
+  let staffLinkOn = true;
+
+  const orgColors = {
+    usyd: '#2E86C1',
+    rnsh: '#E67E22',
+    kolling: '#8E44AD',
+    nslhd: '#27AE60'
+  };
+
+  const precinctColors = {
+    sydnorth: '#148F77',
+    sipfher: '#1A5276'
+  };
+
+  const models = {
+    full: {
+      usyd: 1.0, rnsh: 1.0, kolling: 1.0, nslhd: 1.0,
+      usyd_nosl: 1.0, rnsh_nosl: 1.0, kolling_nosl: 1.0, nslhd_nosl: 0.0
+    },
+    fractional: {
+      usyd: 0.25, rnsh: 0.25, kolling: 0.25, nslhd: 0.25,
+      usyd_nosl: 0.333, rnsh_nosl: 0.333, kolling_nosl: 0.333, nslhd_nosl: 0.0
+    },
+    first: {
+      usyd: 1.0, rnsh: 0.0, kolling: 0.0, nslhd: 0.0,
+      usyd_nosl: 1.0, rnsh_nosl: 0.0, kolling_nosl: 0.0, nslhd_nosl: 0.0
+    },
+    weighted: {
+      usyd: 0.40, rnsh: 0.25, kolling: 0.20, nslhd: 0.15,
+      usyd_nosl: 0.50, rnsh_nosl: 0.30, kolling_nosl: 0.20, nslhd_nosl: 0.0
+    }
+  };
+
+  function selectModel(model) {
+    currentModel = model;
+    document.querySelectorAll('#sb-model-group .sb-radio').forEach(r => r.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    updateScenario();
+  }
+
+  function toggleStaffLink() {
+    staffLinkOn = !staffLinkOn;
+    document.getElementById('sb-stafflink-toggle').classList.toggle('active', staffLinkOn);
+    updateScenario();
+  }
+
+  function updateScenario() {
+    const m = models[currentModel];
+    const suffix = staffLinkOn ? '' : '_nosl';
+
+    const orgs = [
+      { key: 'usyd', name: 'University of Sydney', color: orgColors.usyd, value: m['usyd' + suffix] },
+      { key: 'rnsh', name: 'Royal North Shore Hospital', color: orgColors.rnsh, value: m['rnsh' + suffix] },
+      { key: 'kolling', name: 'Kolling Institute', color: orgColors.kolling, value: m['kolling' + suffix] },
+      { key: 'nslhd', name: 'Northern Sydney LHD' + (staffLinkOn ? ' ✦' : ''), color: orgColors.nslhd, value: m['nslhd' + suffix] }
+    ];
+
+    const maxVal = currentModel === 'full' ? 1.0 : 1.0;
+    const total = orgs.reduce((s, o) => s + o.value, 0);
+
+    // Org bars
+    let barsHtml = '';
+    orgs.forEach(o => {
+      const pct = (o.value / (currentModel === 'full' ? 1.0 : Math.max(total, 1.0))) * 100;
+      const displayPct = Math.min(pct, 100);
+      barsHtml += `
+        <div class="sb-bar-group">
+          <div class="sb-bar-label">
+            <span class="sb-bar-name">${o.name}</span>
+            <span class="sb-bar-value" style="color:${o.color}">${o.value.toFixed(o.value === 0 ? 1 : 2)}</span>
+          </div>
+          <div class="sb-bar-track">
+            <div class="sb-bar-fill" style="width:${displayPct}%;background:${o.color}"></div>
+          </div>
+        </div>`;
+    });
+    document.getElementById('sb-bars').innerHTML = barsHtml;
+    document.getElementById('sb-total').textContent = total.toFixed(2);
+
+    // Precinct rollup
+    let sydNorth, sipfher;
+    if (currentModel === 'full') {
+      sydNorth = (orgs[1].value > 0 || orgs[2].value > 0 || orgs[3].value > 0) ? 1.0 : 0.0;
+      sipfher = orgs[0].value > 0 ? 1.0 : 0.0;
+    } else {
+      sydNorth = orgs[1].value + orgs[2].value + orgs[3].value;
+      sipfher = orgs[0].value;
+    }
+
+    const pTotal = sydNorth + sipfher;
+    const pMax = currentModel === 'full' ? 1.0 : Math.max(pTotal, 1.0);
+
+    let precinctHtml = `
+      <div class="sb-bar-group">
+        <div class="sb-bar-label">
+          <span class="sb-bar-name">Sydney North</span>
+          <span class="sb-bar-value" style="color:${precinctColors.sydnorth}">${sydNorth.toFixed(2)}</span>
+        </div>
+        <div class="sb-bar-track">
+          <div class="sb-bar-fill" style="width:${(sydNorth/pMax)*100}%;background:${precinctColors.sydnorth}"></div>
+        </div>
+      </div>
+      <div class="sb-bar-group">
+        <div class="sb-bar-label">
+          <span class="sb-bar-name">SIPFHER</span>
+          <span class="sb-bar-value" style="color:${precinctColors.sipfher}">${sipfher.toFixed(2)}</span>
+        </div>
+        <div class="sb-bar-track">
+          <div class="sb-bar-fill" style="width:${(sipfher/pMax)*100}%;background:${precinctColors.sipfher}"></div>
+        </div>
+      </div>`;
+    document.getElementById('sb-precinct-bars').innerHTML = precinctHtml;
+  }
+
+  // Initialize scenario builder
+  updateScenario();
+
+  // ===== CALIBRATION CHART =====
+  function drawCalibrationChart() {
+    const canvas = document.getElementById('calibrationCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    const pad = { top: 30, right: 30, bottom: 50, left: 60 };
+    const pw = w - pad.left - pad.right;
+    const ph = h - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = '#FAFBFC';
+    ctx.fillRect(0, 0, w, h);
+
+    // Grid
+    ctx.strokeStyle = '#E8ECF0';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 10; i++) {
+      const x = pad.left + (i / 10) * pw;
+      const y = pad.top + (i / 10) * ph;
+      ctx.beginPath(); ctx.moveTo(x, pad.top); ctx.lineTo(x, pad.top + ph); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + pw, y); ctx.stroke();
+    }
+
+    // Perfect calibration line (diagonal)
+    ctx.strokeStyle = '#BDC3C7';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, pad.top + ph);
+    ctx.lineTo(pad.left + pw, pad.top);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Calibration data points (RAMS)
+    const data = [
+      { predicted: 0.1, actual: 0.08 },
+      { predicted: 0.2, actual: 0.18 },
+      { predicted: 0.3, actual: 0.28 },
+      { predicted: 0.4, actual: 0.38 },
+      { predicted: 0.5, actual: 0.52 },
+      { predicted: 0.6, actual: 0.61 },
+      { predicted: 0.7, actual: 0.72 },
+      { predicted: 0.8, actual: 0.81 },
+      { predicted: 0.9, actual: 0.91 },
+      { predicted: 1.0, actual: 0.98 }
+    ];
+
+    // Draw RAMS curve
+    ctx.strokeStyle = '#148F77';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    data.forEach((d, i) => {
+      const x = pad.left + d.predicted * pw;
+      const y = pad.top + (1 - d.actual) * ph;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Draw data points
+    data.forEach(d => {
+      const x = pad.left + d.predicted * pw;
+      const y = pad.top + (1 - d.actual) * ph;
+      ctx.fillStyle = '#148F77';
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Axis labels
+    ctx.fillStyle = '#7F8C8D';
+    ctx.font = '11px DM Sans, sans-serif';
+    ctx.textAlign = 'center';
+    for (let i = 0; i <= 10; i += 2) {
+      const val = (i / 10).toFixed(1);
+      ctx.fillText(val, pad.left + (i / 10) * pw, pad.top + ph + 20);
+    }
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 10; i += 2) {
+      const val = (i / 10).toFixed(1);
+      ctx.fillText(val, pad.left - 10, pad.top + (1 - i / 10) * ph + 4);
+    }
+
+    // Axis titles
+    ctx.fillStyle = '#2C3E50';
+    ctx.font = '600 12px DM Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Predicted Confidence', pad.left + pw / 2, pad.top + ph + 42);
+
+    ctx.save();
+    ctx.translate(16, pad.top + ph / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Observed Accuracy', 0, 0);
+    ctx.restore();
+
+    // Legend
+    ctx.font = '11px DM Sans, sans-serif';
+    const legendY = pad.top + 10;
+    const legendX = pad.left + pw - 140;
+
+    ctx.strokeStyle = '#BDC3C7';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(legendX, legendY);
+    ctx.lineTo(legendX + 24, legendY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#7F8C8D';
+    ctx.textAlign = 'left';
+    ctx.fillText('Perfect calibration', legendX + 30, legendY + 4);
+
+    ctx.strokeStyle = '#148F77';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(legendX, legendY + 20);
+    ctx.lineTo(legendX + 24, legendY + 20);
+    ctx.stroke();
+    ctx.fillStyle = '#148F77';
+    ctx.fillText('RAMS', legendX + 30, legendY + 24);
   }
 </script>
 
